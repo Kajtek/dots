@@ -95,11 +95,8 @@ install_package() {
             read -rp "Choose action: [s]kip, [o]verwrite, [b]ackup: " action
             case "$action" in
                 s) warn "Skipping $pkg"; return ;;
-                o) echo "FIRST TRY"
-                   stow -D -d "$REPO_ROOT" -t "$HOME" "$pkg" >/dev/null 2>&1 || true
-                   echo "SECOND TRY"
+                o) stow -D -d "$REPO_ROOT" -t "$HOME" "$pkg" >/dev/null 2>&1 || true
                    stow "${stow_opts[@]}" -d "$REPO_ROOT" -t "$HOME" "$pkg"
-                   echo "THIRD TRY"
                    success "Overwritten $pkg"; return ;;
                 b) stow -D -d "$REPO_ROOT" -t "$HOME" "$pkg" --adopt >/dev/null 2>&1 || true
                    stow "${stow_opts[@]}" -d "$REPO_ROOT" -t "$HOME" "$pkg"
