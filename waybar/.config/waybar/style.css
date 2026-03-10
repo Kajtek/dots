@@ -7,108 +7,91 @@
 window#waybar {
     /* background-color: rgba(43, 48, 59, 0.5); */
     background-color: transparent;
-    border-bottom: 3px solid rgba(100, 114, 125, 0.5);
+    /* border-bottom: 3px solid rgba(100, 114, 125, 0.5); */
     color: #ffffff;
     transition-property: background-color;
     transition-duration: .5s;
 }
 
-/* Make all modules semi-transparent */
-window#waybar * {
-    background-color: rgba(0, 0, 0, 0.3);
-}
-
-#workspaces {
-    border-radius: 20px;
-    border: 2px solid #21D6C9;
-    padding: 5px;
-    font-size: 14px;
-}
-
-#idle_inhibitor {
-    border-radius: 20px;
-    border: 2px solid #21D6C9;
-    padding: 5px;
-    font-size: 14px;
-}
-
-#tray {
+/* Settings for all modules except groups */
+.module {
+    background-color: rgba(0, 0, 0, 0.8);
+    background-clip: padding-box;
     border-radius: 20px;
     border: 2px solid #21D6C9;
     padding: 5px;
 }
 
+#workspaces button {
+    border-radius: 20px;
+    background-clip: padding-box;
+    border: 0px;
+}
+
+#workspaces button.active {
+    border: 1px solid #21D6C9;
+}
+
+#taskbar.empty {
+    background-color: transparent;
+    border: 0px;
+}
+
+#taskbar button {
+    border-radius: 20px;
+    background-clip: padding-box;
+    border: 0px;
+}
+
+/* Power group. Every group needs to repeat the settings. */
 #power {
+    background-color: rgba(0, 0, 0, 0.8);
+    background-clip: padding-box;
     border-radius: 20px;
     border: 2px solid #21D6C9;
     padding: 5px;
 }
 
 #power #power-profiles-daemon {
-    font-size: 14px;
+    border: 0px;
     margin-left: 8px;
     min-width: 24px;
 }
 
 #power #battery {
-    font-size: 14px;
+    border: 0px;
     margin-left: 4px;
 }
 
 #power #custom-power {
-    font-size: 14px;
+    border: 0px;
     margin-left: 4px;
 }
 
+/* Hardware group. Every group needs to repeat the settings. */
 #hardware {
+    background-color: rgba(0, 0, 0, 0.8);
+    background-clip: padding-box;
     border-radius: 20px;
     border: 2px solid #21D6C9;
     padding: 5px;
 }
 
 #hardware #temperature {
-    font-size: 14px;
+    border: 0px;
     margin-left: 12px;
 }
 
 #hardware #disk {
-    font-size: 14px;
+    border: 0px;
     margin-left: 12px;
 }
 
 #hardware #memory {
-    font-size: 14px;
+    border: 0px;
     margin-left: 12px;
 }
 
 #hardware #cpu {
-    font-size: 14px;
-}
-
-#clock {
-    font-size: 14px;
-    border-radius: 20px;
-    border: 2px solid #21D6C9;
-    padding: 5px;
-}
-
-#backlight {
-    font-size: 14px;
-    border-radius: 20px;
-    border: 2px solid #21D6C9;
-    padding: 5px;
-}
-
-#pulseaudio {
-    font-size: 14px;
-    border-radius: 20px;
-    border: 2px solid #21D6C9;
-    padding: 5px;
-}
-
-#network {
-    font-size: 14px;
-    border-radius: 20px;
-    border: 2px solid #21D6C9;
-    padding: 5px;
+    border: 0px;
 }
