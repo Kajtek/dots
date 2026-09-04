@@ -39,6 +39,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("systemctl --user start hyprpolkitagent")      -- Polkit agent (ships as a user service)
     hl.exec_cmd("hyprpaper")                                   -- Wallpaper manager
     hl.exec_cmd("hypridle")                                    -- Idle manager / auto screen locker
+    hl.exec_cmd("batsignal -w 20 -c 10 -d 5 -D 'systemctl hibernate'") -- Low-battery notifications; hibernate at 5%
     hl.exec_cmd("hyprsunset")                                  -- Blue-light filter (screen warmth)
     hl.exec_cmd("flameshot")                                   -- Screenshot applet
     hl.exec_cmd("blueman-applet")                              -- Bluetooth manager applet

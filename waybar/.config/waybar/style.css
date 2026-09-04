@@ -68,3 +68,17 @@ window#waybar {
 #hardware #temperature {
     margin-left: 12px;
 }
+
+/* Battery thresholds come from "states" in top.jsonc; batsignal sends the matching notifications. */
+#battery.warning:not(.charging) {
+    color: #FF6633;
+}
+
+#battery.critical:not(.charging) {
+    color: #FF6633;
+    animation: blink 1s steps(2) infinite;
+}
+
+@keyframes blink {
+    to { color: #ffffff; }
+}
