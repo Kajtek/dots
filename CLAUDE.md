@@ -25,16 +25,19 @@ stow -R <pkg>             # relink after adding/removing files inside a package
 Reload after editing:
 
 ```bash
-hyprctl reload && hyprctl configerrors    # hyprland.conf; configerrors must print nothing
+Hyprland --verify-config -c hypr/.config/hypr/hyprland.lua   # offline check; must end with "config ok"
+hyprctl reload && hyprctl configerrors    # hyprland.lua; configerrors must print nothing
 pkill -x waybar; waybar -c ~/.config/waybar/top.jsonc & waybar -c ~/.config/waybar/bottom.jsonc &
-pkill -x hypridle; hyprctl dispatch exec hypridle
+pkill -x hypridle; hyprctl dispatch 'hl.dsp.exec_cmd("hypridle")'
 ```
+
+With a Lua config, `hyprctl dispatch` and `hyprctl eval` take Lua expressions (`hyprctl dispatch 'hl.dsp.focus({ workspace = 3 })'`); `hyprctl keyword` no longer works, use `hyprctl eval 'hl.config({...})'` or `hl.monitor({...})` instead.
 
 Waybar's `style.css` is shared by both bars and reloads live; the `.jsonc` files need a restart. `hyprlock.conf` has no validator short of locking the screen.
 
 ## How the pieces connect
 
-- `hypr/.config/hypr/` holds `hyprland.conf` plus its companions `hypridle.conf` and `hyprlock.conf`. Hyprland's `exec-once` block starts every daemon (two waybar instances, mako, hyprpaper, hypridle, hyprsunset, kanshi, tray applets). If you add a daemon, register it there.
+- `hypr/.config/hypr/` holds `hyprland.lua` plus its companions `hypridle.conf` and `hyprlock.conf` (those two stay in hyprlang; only Hyprland itself moved to Lua). The `hyprland.start` handler in `hyprland.lua` starts every daemon (two waybar instances, mako, hyprpaper, hypridle, hyprsunset, kanshi, tray applets). If you add a daemon, register it there.
 - Two waybar bars, `top.jsonc` and `bottom.jsonc`, share one `style.css` and one `power_menu.xml`. Each jsonc file defines only the modules it lists.
 - Lid handling: logind is set to ignore the lid in `/etc/systemd/logind.conf`, so Hyprland's `switch:on/off:Lid Switch` binds call `hyprlid/.local/bin/lid-handler.sh`, which decides between suspend and turning the internal panel off. `kanshi/config` separately disables the panel whenever the dock's `DP-5` output is present. Both touch `eDP-1`, so monitor changes should be checked against both.
 - `bashrc` evals starship; `starship/.config/starship.toml` is intentionally empty (defaults).

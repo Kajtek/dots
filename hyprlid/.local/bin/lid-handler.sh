@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Lid handler, run by Hyprland's "switch:on/off:Lid Switch" binds (see hyprland.conf).
+# Lid handler, run by Hyprland's "switch:on/off:Lid Switch" binds (see hyprland.lua).
 # logind is configured to ignore the lid, so this script owns the policy:
 #   closed, on battery            -> suspend
 #   closed, on AC, external screen -> turn the internal panel off, keep working
@@ -27,10 +27,10 @@ external_monitors() {
 
 if [[ "$(lid_state)" == "closed" ]]; then
     if [[ "$(ac_online)" == "1" && "$(external_monitors)" -gt 0 ]]; then
-        hyprctl keyword monitor "$INTERNAL,disable"
+        hyprctl eval "hl.monitor({ output = \"$INTERNAL\", disabled = true })"
     else
         systemctl suspend
     fi
 else
-    hyprctl keyword monitor "$INTERNAL,preferred,auto,1.5"
+    hyprctl eval "hl.monitor({ output = \"$INTERNAL\", mode = \"preferred\", position = \"auto\", scale = 1.5 })"
 fi
