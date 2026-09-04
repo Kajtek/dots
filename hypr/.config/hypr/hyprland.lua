@@ -103,7 +103,7 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 10,
+        rounding       = 20, -- matches the waybar pill radius in waybar/style.css
         rounding_power = 2,
 
         -- Change transparency of focused and unfocused windows
@@ -112,7 +112,7 @@ hl.config({
 
         shadow = {
             enabled      = true,
-            range        = 4,
+            range        = 12,
             render_power = 3,
             color        = "rgba(1a1a1aee)",
         },
