@@ -1,0 +1,21 @@
+# Notifications, styled like the waybar pills: translucent black, teal border, Hack font.
+# Hyprland blurs behind this layer (layer rule "blur-mako" in hyprland.lua), so the background
+# alpha matches the pills in waybar/style.css. Started from hyprland.lua; reload with `makoctl reload`.
+
+font=Hack 11
+text-color=#FFFFFF
+background-color=#00000099
+border-color=#21D6C9
+border-size=2
+border-radius=12
+padding=10
+margin=10
+width=360
+icons=1
+max-icon-size=32
+progress-color=over #21D6C966
+default-timeout=5000
+
+[urgency=critical]
+border-color=#FF6633
+default-timeout=0
