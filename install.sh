@@ -83,30 +83,35 @@ else
 fi
 
 # === Install Function ===
+# On conflict (a real file already exists in $HOME) there are two honest options:
+#   overwrite: repo version wins. `--adopt` moves the home file into the repo, then
+#              `git checkout` throws that copy away and the symlink now points at the repo version.
+#   adopt:     home version wins. Same `--adopt`, but the moved file is kept as an
+#              uncommitted change so you can diff and commit it.
 install_package() {
     local pkg="$1"
     local stow_opts=("-v")
     $DRY_RUN && stow_opts+=("--simulate")
 
     info "Installing package: $pkg"
-    if ! stow "${stow_opts[@]}" -d "$REPO_ROOT" -t "$HOME" "$pkg"; then
-        warn "Conflict detected for $pkg"
-        while true; do
-            read -rp "Choose action: [s]kip, [o]verwrite, [b]ackup: " action
-            case "$action" in
-                s) warn "Skipping $pkg"; return ;;
-                o) stow -D -d "$REPO_ROOT" -t "$HOME" "$pkg" >/dev/null 2>&1 || true
-                   stow "${stow_opts[@]}" -d "$REPO_ROOT" -t "$HOME" "$pkg"
-                   success "Overwritten $pkg"; return ;;
-                b) stow -D -d "$REPO_ROOT" -t "$HOME" "$pkg" --adopt >/dev/null 2>&1 || true
-                   stow "${stow_opts[@]}" -d "$REPO_ROOT" -t "$HOME" "$pkg"
-                   success "Backed up and installed $pkg"; return ;;
-                *) echo "Invalid choice";;
-            esac
-        done
-    else
+    if stow "${stow_opts[@]}" -d "$REPO_ROOT" -t "$HOME" "$pkg"; then
         success "Installed $pkg"
+        return
     fi
+
+    warn "Conflict detected for $pkg"
+    while true; do
+        read -rp "Choose action: [s]kip, [o]verwrite (repo wins), [a]dopt (home wins): " action
+        case "$action" in
+            s) warn "Skipping $pkg"; return ;;
+            o) stow "${stow_opts[@]}" --adopt -d "$REPO_ROOT" -t "$HOME" "$pkg"
+               $DRY_RUN || git -C "$REPO_ROOT" checkout -- "$pkg"
+               success "Overwritten $pkg with repo version"; return ;;
+            a) stow "${stow_opts[@]}" --adopt -d "$REPO_ROOT" -t "$HOME" "$pkg"
+               success "Adopted home version of $pkg (see git status)"; return ;;
+            *) echo "Invalid choice";;
+        esac
+    done
 }
 
 # === Main Installation Loop ===
