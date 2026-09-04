@@ -8,13 +8,11 @@
 ------------------
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
--- Fallback rule for every output. lid-handler.sh re-applies it when the lid opens; keep them in sync.
-hl.monitor({
-    output   = "",
-    mode     = "preferred",
-    position = "auto",
-    scale    = 1.5,
-})
+-- The laptop panel is 144 PPI, so 1.5 gives ~96 logical PPI there. lid-handler.sh re-applies this rule
+-- when the lid opens; keep them in sync. Every other output picks its own scale from its PPI so
+-- gaps, borders and fonts (all logical px) look the same physical size on any monitor.
+hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 1.5 })
+hl.monitor({ output = "",      mode = "preferred", position = "auto", scale = "auto" })
 
 
 ---------------------
@@ -158,22 +156,21 @@ hl.animation({ leaf = "workspacesOut", enabled = true, speed = 1.94, bezier = "a
 hl.animation({ leaf = "zoomFactor",    enabled = true, speed = 7,    bezier = "quick" })
 
 -- Ref https://wiki.hypr.land/Configuring/Basics/Workspace-Rules/
--- "Smart gaps" / "No gaps when only"
--- uncomment all if you wish to use that.
--- hl.workspace_rule({ workspace = "w[tv1]", gaps_out = 0, gaps_in = 0 })
--- hl.workspace_rule({ workspace = "f[1]",   gaps_out = 0, gaps_in = 0 })
--- hl.window_rule({
---     name  = "no-gaps-wtv1",
---     match = { float = false, workspace = "w[tv1]" },
---     border_size = 0,
---     rounding    = 0,
--- })
--- hl.window_rule({
---     name  = "no-gaps-f1",
---     match = { float = false, workspace = "f[1]" },
---     border_size = 0,
---     rounding    = 0,
--- })
+-- "No gaps when only": a lone tiled window (or a fullscreen one) fills the screen edge to edge.
+hl.workspace_rule({ workspace = "w[tv1]", gaps_out = 0, gaps_in = 0 })
+hl.workspace_rule({ workspace = "f[1]",   gaps_out = 0, gaps_in = 0 })
+hl.window_rule({
+    name  = "no-gaps-wtv1",
+    match = { float = false, workspace = "w[tv1]" },
+    border_size = 0,
+    rounding    = 0,
+})
+hl.window_rule({
+    name  = "no-gaps-f1",
+    match = { float = false, workspace = "f[1]" },
+    border_size = 0,
+    rounding    = 0,
+})
 
 -- See https://wiki.hypr.land/Configuring/Layouts/Dwindle-Layout/ for more
 hl.config({
