@@ -24,24 +24,24 @@
         ]
     },
     "cpu": {
-        "format": " : {usage} % |",
+        "format": " : {usage} % |",
         "tooltip": false
     },
     "memory": {
-        "format": ": {percentage} % |"
+        "format": ": {percentage} % |"
     },
     "disk": {
         "interval": 30,
-        "format": ": {percentage_used} % |",
+        "format": ": {percentage_used} % |",
         "path": "/"
     },
     "temperature": {
         "critical-threshold": 80,
         "format": "{icon}: {temperatureC} °C ",
         "format-icons": [
-            "",
-            "",
-            ""
+            "",
+            "",
+            ""
         ]
     },
     "wlr/taskbar": {
@@ -56,8 +56,8 @@
         "spacing": 4
     },
     "clock": {
-        "format": " : {:%H:%M}  ",
-        "format-alt": "{:%A, %B %d, %Y (%R)}   ",
+        "format": " : {:%H:%M}  ",
+        "format-alt": "{:%A, %B %d, %Y (%R)}   ",
         "tooltip-format": "<tt><small>{calendar}</small></tt>",
         "calendar": {
             "mode": "year",
