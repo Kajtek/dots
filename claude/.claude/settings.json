@@ -1,0 +1,42 @@
+{
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "permissions": {
+    "ask": [
+      "Bash(git commit *)",
+      "Bash(git commit)",
+      "Bash(git push *)",
+      "Bash(git push)",
+      "Bash(git branch -d *)",
+      "Bash(git branch -D *)",
+      "Bash(git push * --delete *)",
+      "Bash(gh pr merge *)",
+      "Bash(glab mr merge *)",
+      "Bash(git reset --hard *)",
+      "Bash(git rebase *)"
+    ]
+  },
+  "model": "claude-fable-5-1[1m]",
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "gopls-lsp@claude-plugins-official": true,
+    "maister@maister-plugins": true,
+    "frontend-design@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "maister-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "SkillPanel/maister"
+      }
+    }
+  },
+  "effortLevel": "high",
+  "theme": "auto"
+}

@@ -42,6 +42,7 @@ Waybar's `style.css` is shared by both bars and reloads live; the `.jsonc` files
 - `mako/.config/mako/config` copies the waybar pill look (translucent black, `#21D6C9` border, Hack font); change the colours in both places together. Reload with `makoctl reload`.
 - Lid handling: logind is set to ignore the lid in `/etc/systemd/logind.conf`, so Hyprland's `switch:on/off:Lid Switch` binds call `hyprlid/.local/bin/lid-handler.sh`, which decides between suspend and turning the internal panel off. `kanshi/config` separately disables the panel whenever the dock's `DP-5` output is present. Both touch `eDP-1`, so monitor changes should be checked against both.
 - `bashrc` evals starship; `starship/.config/starship.toml` is intentionally empty (defaults).
+- `claude/` tracks Claude Code's user-level config: `~/.claude/CLAUDE.md`, `settings.json`, `commands/`, the status-line script, and `~/CLAUDE.md`. Claude Code rewrites `settings.json` through the link when a setting changes in the app, so check `git diff` before committing.
 
 ## Conventions
 
