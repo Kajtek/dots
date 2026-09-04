@@ -111,7 +111,7 @@ hl.config({
     },
 
     decoration = {
-        rounding       = 20, -- matches the waybar pill radius in waybar/style.css
+        rounding       = 12, -- common window radius; the waybar pills are fully round on purpose
         rounding_power = 2,
 
         -- Focus is shown by a slight dim rather than heavy transparency: opacity multiplies with the

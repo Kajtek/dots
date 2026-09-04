@@ -16,7 +16,7 @@ window#waybar {
 .module,
 #power,
 #hardware {
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(0, 0, 0, 0.6); /* translucent: Hyprland blurs behind the bar (layer rule in hyprland.lua) */
     background-clip: padding-box;
     border-radius: 20px;
     border: 2px solid #21D6C9;
