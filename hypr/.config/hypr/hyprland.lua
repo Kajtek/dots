@@ -56,6 +56,14 @@ end)
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
 
+-- Prefer native Wayland in every toolkit. At the fractional 1.5 scale an XWayland window is rendered
+-- at 1x and upscaled, so its text is blurry; a native window renders sharp. Fallbacks stay for
+-- apps without Wayland support.
+hl.env("GDK_BACKEND", "wayland,x11,*")
+hl.env("QT_QPA_PLATFORM", "wayland;xcb")
+hl.env("QT_WAYLAND_DISABLE_WINDOWDECORATION", "1")
+hl.env("ELECTRON_OZONE_PLATFORM_HINT", "auto")
+
 
 -----------------------
 ----- PERMISSIONS -----
@@ -106,9 +114,12 @@ hl.config({
         rounding       = 20, -- matches the waybar pill radius in waybar/style.css
         rounding_power = 2,
 
-        -- Change transparency of focused and unfocused windows
+        -- Focus is shown by a slight dim rather than heavy transparency: opacity multiplies with the
+        -- app's own (kitty is already 0.8), and 0.8 x 0.8 made unfocused terminals hard to read.
         active_opacity   = 1.0,
-        inactive_opacity = 0.8,
+        inactive_opacity = 0.9,
+        dim_inactive     = true,
+        dim_strength     = 0.1,
 
         shadow = {
             enabled      = true,
@@ -117,10 +128,13 @@ hl.config({
             color        = "rgba(1a1a1aee)",
         },
 
+        -- size 3 / passes 1 leaves visible banding behind translucent surfaces; 6 / 2 is smooth and
+        -- still cheap on an iGPU. popups blurs right-click menus and dropdowns the same way.
         blur = {
             enabled  = true,
-            size     = 3,
-            passes   = 1,
+            size     = 6,
+            passes   = 2,
+            popups   = true,
             vibrancy = 0.1696,
         },
     },
@@ -188,8 +202,10 @@ hl.config({
 
 hl.config({
     misc = {
-        force_default_wallpaper = -1,    -- Set to 0 or 1 to disable the anime mascot wallpapers
-        disable_hyprland_logo   = false, -- If true disables the random hyprland logo / anime girl background. :(
+        font_family             = "Hack", -- Hyprland's own text (error bar, groupbar); same font as kitty and hyprlock
+        force_default_wallpaper = 0,      -- Plain default wallpaper, no anime mascot (0 or 1); -1 picks at random
+        disable_splash_rendering = true,  -- No random joke text drawn on the wallpaper
+        disable_hyprland_logo   = false,  -- If true disables the random hyprland logo / anime girl background. :(
     },
 })
 
@@ -305,6 +321,16 @@ hl.window_rule({
 })
 
 hl.window_rule({
+    -- Utility dialogs open floating and centred instead of being tiled into the layout.
+    name  = "float-dialogs",
+    match = { class = "^(org\\.pulseaudio\\.pavucontrol|blueman-manager|xdg-desktop-portal-gtk|nm-connection-editor)$" },
+
+    float  = true,
+    center = true,
+    size   = { "monitor_w * 0.55", "monitor_h * 0.65" },
+})
+
+hl.window_rule({
     -- Fix some dragging issues with XWayland
     name  = "fix-xwayland-drags",
     match = {
@@ -318,3 +344,9 @@ hl.window_rule({
 
     no_focus = true,
 })
+
+-- See https://wiki.hypr.land/Configuring/Basics/Layer-Rules/
+-- Blur behind the bars and notifications so their translucent pills read as glass over the wallpaper.
+-- ignore_alpha keeps the fully transparent bar background unblurred; only the pills (alpha 0.8) get it.
+hl.layer_rule({ name = "blur-waybar", match = { namespace = "waybar" },        blur = true, ignore_alpha = 0.3 })
+hl.layer_rule({ name = "blur-mako",   match = { namespace = "notifications" }, blur = true, ignore_alpha = 0.3 })
