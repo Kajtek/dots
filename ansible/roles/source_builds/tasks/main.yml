@@ -1,0 +1,16 @@
+# Builds the pinned upstream releases listed in source_builds (empty on Arch) one after
+# another; the order in vars/<Distribution>.yml is the dependency order.
+- name: Create the stamp directory
+  ansible.builtin.file:
+    path: "{{ source_builds_stamp_dir }}"
+    state: directory
+    mode: "0755"
+  become: true
+  when: source_builds | length > 0
+
+- name: Build each pinned component
+  ansible.builtin.include_tasks: build.yml
+  loop: "{{ source_builds }}"
+  loop_control:
+    loop_var: pkg
+    label: "{{ pkg.name }} {{ pkg.version }}"

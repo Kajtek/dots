@@ -1,0 +1,94 @@
+# Ubuntu: vendor repositories, then apt, then the few things apt cannot provide (fonts at the
+# needed versions, wl-clip-persist) fetched from upstream releases. Hyprland itself is built
+# by the source_builds role.
+- name: Install python3-debian (deb822_repository needs it)
+  ansible.builtin.apt:
+    update_cache: true
+    name: python3-debian
+    state: present
+  become: true
+
+- name: Add vendor apt repositories
+  ansible.builtin.deb822_repository:
+    name: "{{ item.name }}"
+    uris: "{{ item.uris }}"
+    suites: "{{ item.suites }}"
+    components: "{{ item.components }}"
+    architectures: "{{ item.architectures | default(omit) }}"
+    signed_by: "{{ item.signed_by }}"
+  loop: "{{ apt_repositories }}"
+  loop_control:
+    label: "{{ item.name }}"
+  become: true
+
+- name: Install apt packages
+  ansible.builtin.apt:
+    update_cache: true
+    name: "{{ apt_packages + apt_build_packages }}"
+    state: present
+  become: true
+
+- name: Provide 'brave' on PATH (hyprland.lua binds it; Ubuntu's binary is brave-browser)
+  ansible.builtin.file:
+    src: /usr/bin/brave-browser
+    dest: /usr/local/bin/brave
+    state: link
+  become: true
+
+- name: Download fonts apt lacks
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ build_root }}/{{ item.url | basename }}"
+    checksum: "sha256:{{ item.sha256 }}"
+    mode: "0644"
+  loop: "{{ fonts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Create a directory per font family
+  ansible.builtin.file:
+    path: "{{ ansible_facts.user_dir }}/.local/share/fonts/{{ item.name }}"
+    state: directory
+    mode: "0755"
+  loop: "{{ fonts }}"
+  loop_control:
+    label: "{{ item.name }}"
+
+- name: Unpack the fonts
+  ansible.builtin.unarchive:
+    src: "{{ build_root }}/{{ item.url | basename }}"
+    dest: "{{ ansible_facts.user_dir }}/.local/share/fonts/{{ item.name }}"
+    include: "{{ item.include }}"
+    remote_src: true
+  loop: "{{ fonts }}"
+  loop_control:
+    label: "{{ item.name }}"
+  notify: Refresh the font cache
+
+- name: Check for wl-clip-persist
+  ansible.builtin.stat:
+    path: /usr/local/bin/wl-clip-persist
+  register: packages_wl_clip_persist
+
+- name: Build wl-clip-persist (no apt package, no prebuilt release)
+  when: not packages_wl_clip_persist.stat.exists
+  block:
+    - name: Build wl-clip-persist with cargo
+      ansible.builtin.command:
+        cmd: >-
+          cargo install --locked --git https://github.com/Linus789/wl-clip-persist
+          --tag v0.5.0 --root {{ build_root }}/wl-clip-persist
+      changed_when: true
+
+    - name: Install wl-clip-persist
+      ansible.builtin.copy:
+        src: "{{ build_root }}/wl-clip-persist/bin/wl-clip-persist"
+        dest: /usr/local/bin/wl-clip-persist
+        mode: "0755"
+        remote_src: true
+      become: true
+
+    - name: Remove the wl-clip-persist build tree
+      ansible.builtin.file:
+        path: "{{ build_root }}/wl-clip-persist"
+        state: absent

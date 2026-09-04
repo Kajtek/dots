@@ -1,0 +1,80 @@
+# Final check: everything hyprland.lua starts or binds is on PATH, the config parses, and
+# the links in $HOME point into the repo. A failure here names exactly what is missing.
+- name: Look up every program the Hyprland config references
+  # `command -v` is a shell builtin, so this needs a shell.
+  ansible.builtin.shell: command -v {{ item }} # noqa: command-instead-of-shell
+  environment:
+    PATH: "{{ ansible_facts.user_dir }}/.local/bin:/usr/local/bin:{{ ansible_facts.env.PATH }}"
+  loop:
+    - Hyprland
+    - start-hyprland
+    - hyprctl
+    - waybar
+    - mako
+    - wl-clip-persist
+    - hyprpaper
+    - hypridle
+    - hyprlock
+    - batsignal
+    - hyprsunset
+    - flameshot
+    - blueman-applet
+    - signal-desktop
+    - kanshi
+    - kitty
+    - hyprlauncher
+    - brave
+    - wpctl
+    - brightnessctl
+    - jq
+    - stow
+    - starship
+    - code
+    - claude
+  register: verify_lookups
+  changed_when: false
+  failed_when: false
+
+- name: Fail on missing programs
+  ansible.builtin.assert:
+    that: verify_lookups.results | rejectattr('rc', 'eq', 0) | list | length == 0
+    fail_msg: "Missing from PATH: {{ verify_lookups.results | rejectattr('rc', 'eq', 0) | map(attribute='item') | join(', ') }}"
+
+# Hyprland refuses to start, even just to parse a config, without XDG_RUNTIME_DIR. Outside a
+# login session (containers, CI) a private scratch directory stands in for it.
+- name: Provide a runtime directory for the config check
+  ansible.builtin.file:
+    path: "{{ build_root }}/xdg-runtime"
+    state: directory
+    mode: "0700"
+
+- name: Check the Hyprland config parses
+  ansible.builtin.command: Hyprland --verify-config -c {{ repo_root }}/hypr/.config/hypr/hyprland.lua
+  environment:
+    PATH: "/usr/local/bin:{{ ansible_facts.env.PATH }}"
+    XDG_RUNTIME_DIR: "{{ ansible_facts.env.XDG_RUNTIME_DIR | default(build_root + '/xdg-runtime') }}"
+  register: verify_config
+  changed_when: false
+  failed_when: "'config ok' not in verify_config.stdout"
+
+- name: Inspect the links Stow should have made
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.user_dir }}/{{ item }}"
+  loop:
+    - .bashrc
+    - .config/hypr/hyprland.lua
+    - .config/waybar/top.jsonc
+    - .local/bin/lid-handler.sh
+    - .claude/settings.json
+  register: verify_links
+
+- name: Fail when a link is missing or points elsewhere
+  ansible.builtin.assert:
+    that:
+      - item.stat.islnk | default(false)
+      - item.stat.lnk_source is defined and item.stat.lnk_source.startswith(repo_root)
+    fail_msg: "{{ item.item }} is not a link into {{ repo_root }}"
+    quiet: true
+  loop: "{{ verify_links.results }}"
+  loop_control:
+    label: "{{ item.item }}"

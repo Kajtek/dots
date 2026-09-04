@@ -1,0 +1,3 @@
+# Where finished builds leave their stamp. The build environment (compiler, search paths)
+# is distro-specific and lives next to the source list in vars/<Distribution>.yml.
+source_builds_stamp_dir: /usr/local/share/dots-build

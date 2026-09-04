@@ -1,0 +1,48 @@
+# Bring-up of this workstation, in order: packages, source builds (Ubuntu only), system files
+# outside $HOME, the Stow packages, Claude Code, and a final check that everything the Hyprland
+# config references is present. Run through ../bootstrap.sh or directly:
+#
+#   ansible-playbook -K playbook.yml [--check --diff] [--tags packages,build,system,dotfiles,claude,verify]
+#
+# Every role is idempotent: rerun after pulling the repo or editing vars/<Distribution>.yml.
+- name: Bring up the workstation
+  hosts: localhost
+  vars:
+    repo_root: "{{ playbook_dir | dirname }}"
+    # Scratch space for downloads and source trees; each role removes what it extracted.
+    build_root: "{{ ansible_facts.user_dir }}/.cache/dots-build"
+    # Containers (used to test this playbook) have no systemd and no hardware; service
+    # management and hardware-only checks are skipped there.
+    in_container: >-
+      {{ ansible_facts.virtualization_role == 'guest'
+         and ansible_facts.virtualization_type in ['docker', 'podman', 'container', 'lxc'] }}
+  pre_tasks:
+    - name: Refuse unsupported distributions before touching anything
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.distribution in ['Archlinux', 'Ubuntu']
+          - ansible_facts.distribution != 'Ubuntu'
+            or ansible_facts.distribution_version is version('26.04', '>=')
+        fail_msg: >-
+          Supported targets are Arch Linux and Ubuntu 26.04 or newer;
+          this is {{ ansible_facts.distribution }} {{ ansible_facts.distribution_version }}.
+      tags: always
+
+    - name: Load the package lists for this distribution
+      ansible.builtin.include_vars: "vars/{{ ansible_facts.distribution }}.yml"
+      tags: always
+
+    - name: Create the scratch directory
+      ansible.builtin.file:
+        path: "{{ build_root }}"
+        state: directory
+        mode: "0755"
+      tags: always
+
+  roles:
+    - { role: packages, tags: packages }
+    - { role: source_builds, tags: build }
+    - { role: system, tags: system }
+    - { role: dotfiles, tags: dotfiles }
+    - { role: claude_code, tags: claude }
+    - { role: verify, tags: verify }

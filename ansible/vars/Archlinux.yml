@@ -1,0 +1,67 @@
+# Arch Linux: everything comes from the official repos except brave-bin, which is built
+# from the AUR with makepkg (see roles/packages/tasks/aur.yml). Nothing is built from source.
+
+pacman_packages:
+  # tooling
+  - base-devel      # makepkg for the AUR packages below
+  - git
+  - git-lfs
+  - stow
+  - jq
+  # Hyprland and the daemons hypr/.config/hypr/hyprland.lua starts
+  - hyprland
+  - hyprpaper
+  - hypridle
+  - hyprlock
+  - hyprsunset
+  - hyprlauncher
+  - hyprpolkitagent
+  - xdg-desktop-portal-hyprland
+  - xdg-desktop-portal-gtk
+  - xorg-xwayland
+  - qt6-wayland
+  - waybar
+  - mako
+  - kanshi
+  - kitty
+  - starship
+  - batsignal
+  - brightnessctl
+  - wl-clipboard
+  - wl-clip-persist
+  - flameshot
+  - blueman
+  - signal-desktop
+  - pavucontrol
+  - pipewire
+  - pipewire-pulse
+  - wireplumber
+  - power-profiles-daemon
+  - bluez
+  - networkmanager
+  - gnome-keyring   # vscode-oss/argv.json sets password-store=gnome-libsecret
+  - greetd
+  - greetd-regreet
+  - code            # the OSS build, which reads ~/.vscode-oss/argv.json
+  # fonts: Hack (kitty, mako, hyprlock); Font Awesome and Nerd symbols (waybar glyphs)
+  - ttf-hack
+  - ttf-hack-nerd
+  - otf-font-awesome
+  - ttf-font-awesome
+  - ttf-nerd-fonts-symbols
+  - noto-fonts
+
+aur_packages:
+  - brave-bin
+
+system_services:
+  - NetworkManager
+  - bluetooth
+  - power-profiles-daemon
+
+# greetd runs a minimal Hyprland session that hosts regreet (roles/system/files/greetd-hyprland.conf).
+greetd_user: greeter
+greetd_vt: 1
+greetd_command: start-hyprland -- -c /etc/greetd/hyprland.conf
+
+source_builds: []

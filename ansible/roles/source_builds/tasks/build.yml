@@ -1,0 +1,70 @@
+# One component: skip when its stamp exists, otherwise download, extract, build as the user,
+# install as root, refresh the linker cache, stamp, and remove the source tree.
+- name: Check the install stamp of {{ pkg.name }}
+  ansible.builtin.stat:
+    path: "{{ source_builds_stamp_dir }}/{{ pkg.name }}-{{ pkg.version }}"
+  register: source_builds_stamp
+
+- name: Build and install {{ pkg.name }}
+  when: not source_builds_stamp.stat.exists
+  vars:
+    src_dir: "{{ build_root }}/{{ pkg.name }}-{{ pkg.version }}"
+    tarball: "{{ build_root }}/{{ pkg.name }}-{{ pkg.version }}.{{ pkg.url | regex_search('tar\\.(gz|xz)$') }}"
+  block:
+    - name: Download {{ pkg.url }}
+      ansible.builtin.get_url:
+        url: "{{ pkg.url }}"
+        dest: "{{ tarball }}"
+        mode: "0644"
+        checksum: "sha256:{{ pkg.sha256 }}"
+
+    # A tree left behind by a failed attempt would make `meson setup` reuse its stale
+    # configuration instead of reconfiguring, so every attempt starts from a clean extract.
+    - name: Remove any leftover source tree of {{ pkg.name }}
+      ansible.builtin.file:
+        path: "{{ src_dir }}"
+        state: absent
+
+    - name: Create the source directory of {{ pkg.name }}
+      ansible.builtin.file:
+        path: "{{ src_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Extract {{ pkg.name }}
+      ansible.builtin.unarchive:
+        src: "{{ tarball }}"
+        dest: "{{ src_dir }}"
+        remote_src: true
+        extra_opts: [--strip-components=1]
+
+    - name: Build {{ pkg.name }}
+      # pkg.build chains commands with &&, so a shell is required here.
+      ansible.builtin.shell: # noqa: command-instead-of-shell
+        cmd: "{{ pkg.build }}"
+        chdir: "{{ src_dir }}"
+      environment: "{{ source_builds_env }}"
+      changed_when: true
+
+    - name: Install {{ pkg.name }}
+      ansible.builtin.shell:
+        cmd: "{{ pkg.install }} && ldconfig"
+        chdir: "{{ src_dir }}"
+      environment: "{{ source_builds_env }}"
+      become: true
+      changed_when: true
+
+    - name: Stamp {{ pkg.name }}
+      ansible.builtin.file:
+        path: "{{ source_builds_stamp_dir }}/{{ pkg.name }}-{{ pkg.version }}"
+        state: touch
+        mode: "0644"
+      become: true
+
+    - name: Remove the source tree and tarball of {{ pkg.name }}
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - "{{ src_dir }}"
+        - "{{ tarball }}"

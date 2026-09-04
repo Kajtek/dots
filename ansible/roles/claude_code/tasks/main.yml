@@ -1,0 +1,20 @@
+# Claude Code is not packaged by either distro; its native installer puts the binary under
+# ~/.local/share/claude and links ~/.local/bin/claude. The claude Stow package supplies the
+# user-level settings.
+- name: Check for Claude Code
+  ansible.builtin.stat:
+    path: "{{ ansible_facts.user_dir }}/.local/bin/claude"
+  register: claude_code_bin
+
+- name: Install Claude Code
+  when: not claude_code_bin.stat.exists
+  block:
+    - name: Download the installer
+      ansible.builtin.get_url:
+        url: https://claude.ai/install.sh
+        dest: "{{ build_root }}/claude-install.sh"
+        mode: "0755"
+
+    - name: Run the installer
+      ansible.builtin.command: bash {{ build_root }}/claude-install.sh
+      changed_when: true

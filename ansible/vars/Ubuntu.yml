@@ -1,0 +1,371 @@
+# Ubuntu 26.04 LTS. apt covers the tooling and the desktop around Hyprland, but Hyprland needs
+# a release with the Lua config format (0.56+) that Ubuntu does not ship. Hyprland, its
+# libraries and every hypr* tool are therefore built from pinned upstream releases into
+# /usr/local (source_builds below); mixing apt's hypr* packages in would load two versions of
+# the same libraries into one process. The pins match the Arch packages this setup runs on, so
+# both machines behave the same. Two components install outside /usr/local because their hosts
+# only look there: xdg-desktop-portal-hyprland (xdg-desktop-portal scans /usr/share) and the
+# QML style module (Qt's import path).
+
+# Vendor repositories, each signed by the vendor's own keyring URL (deb822 sources).
+apt_repositories:
+  - name: brave-browser
+    uris: https://brave-browser-apt-release.s3.brave.com/
+    suites: stable
+    components: main
+    signed_by: https://brave-browser-apt-release.s3.brave.com/brave-browser-archive-keyring.gpg
+  - name: signal-desktop
+    uris: https://updates.signal.org/desktop/apt
+    suites: xenial
+    components: main
+    architectures: amd64
+    signed_by: https://updates.signal.org/desktop/apt/keys.asc
+  - name: vscode
+    uris: https://packages.microsoft.com/repos/code
+    suites: stable
+    components: main
+    architectures: amd64
+    signed_by: https://packages.microsoft.com/keys/microsoft.asc
+
+apt_packages:
+  # tooling
+  - git
+  - git-lfs
+  - stow
+  - jq
+  - curl
+  - ca-certificates
+  - unzip
+  - xz-utils
+  - cargo           # builds wl-clip-persist: no apt package, no prebuilt release
+  # desktop pieces around the hypr* stack
+  - xdg-desktop-portal
+  - xdg-desktop-portal-gtk
+  - xwayland
+  - qt6-wayland
+  - qml6-module-qtquick-controls    # hyprpolkitagent's QML runtime
+  - qml6-module-qtquick-layouts
+  - qml6-module-qtquick-templates
+  - qml6-module-qtqml-workerscript
+  - waybar
+  - mako-notifier
+  - kanshi
+  - kitty
+  - starship
+  - brightnessctl
+  - wl-clipboard
+  - flameshot
+  - blueman
+  - pavucontrol
+  - pipewire
+  - pipewire-audio
+  - wireplumber
+  - power-profiles-daemon
+  - bluez
+  - network-manager
+  - gnome-keyring
+  - polkitd
+  - libnotify-bin
+  - greetd
+  - tuigreet        # regreet is not packaged; tuigreet is the greeter on Ubuntu
+  - fonts-hack
+  - fonts-noto-core
+  # from the vendor repositories above
+  - brave-browser
+  - signal-desktop
+  - code            # Microsoft's build; it does not read ~/.vscode-oss/argv.json
+
+# Build dependencies for source_builds; -dev packages only.
+apt_build_packages:
+  - build-essential
+  - g++-16          # Hyprland 0.56 uses C++26 library features that GCC 15's libstdc++ lacks; upstream builds with GCC 16
+  - cmake
+  - meson
+  - ninja-build
+  - pkgconf
+  - python3
+  - libwayland-dev
+  - libwayland-bin
+  - libexpat1-dev
+  - libxml2-dev
+  - libpugixml-dev
+  - libpixman-1-dev
+  - libcairo2-dev
+  - libpango1.0-dev
+  - librsvg2-dev
+  - libzip-dev
+  - libtomlplusplus-dev
+  - libmagic-dev
+  - libjpeg-dev
+  - libjxl-dev
+  - libpng-dev
+  - libwebp-dev
+  - libdisplay-info-dev
+  - hwdata          # aquamarine reads PCI ids via its pkg-config file
+  - libdrm-dev
+  - libgbm-dev
+  - libegl1-mesa-dev
+  - libgles2-mesa-dev
+  - libglvnd-dev
+  - libopengl-dev
+  - libinput-dev
+  - libeis-dev      # Hyprland links libeis-1.0, the emulated-input server side
+  - libseat-dev
+  - libudev-dev
+  - libxkbcommon-dev
+  - libffi-dev
+  - libiniparser-dev
+  - libglib2.0-dev
+  - libglaze-dev
+  - glslang-dev
+  - glslang-tools
+  - liblcms2-dev
+  - libmuparser-dev
+  - libre2-dev
+  - uuid-dev
+  - libx11-dev
+  - libx11-xcb-dev
+  - libxcursor-dev
+  - libxfixes-dev
+  - libxrender-dev
+  - libxcomposite-dev
+  - libxcb-composite0-dev
+  - libxcb-errors-dev
+  - libxcb-ewmh-dev
+  - libxcb-icccm4-dev
+  - libxcb-image0-dev
+  - libxcb-keysyms1-dev
+  - libxcb-render-util0-dev
+  - libxcb-res0-dev
+  - libxcb-util-dev
+  - libxcb-xfixes0-dev
+  - libxcb-xinput-dev
+  - libxcb-xkb-dev
+  - libxcb-present-dev
+  - libxcb-dri3-dev
+  - libsdbus-c++-dev
+  - libpam0g-dev    # hyprlock
+  - libsystemd-dev
+  - libpipewire-0.3-dev
+  - libinih-dev
+  - qt6-base-dev
+  - qt6-base-private-dev
+  - qt6-declarative-dev
+  - qt6-declarative-private-dev
+  - libpolkit-qt6-1-dev
+  - libpolkit-agent-1-dev
+  - libfontconfig-dev
+  - libicu-dev
+  - libqalculate-dev
+  - libnotify-dev
+  - libgtest-dev
+  - libreadline-dev # hyprctl
+
+# Fonts apt lacks at the versions the waybar config was written against; unpacked into
+# ~/.local/share/fonts/<name>.
+fonts:
+  - name: font-awesome-7.3.1
+    url: https://github.com/FortAwesome/Font-Awesome/releases/download/7.3.1/fontawesome-free-7.3.1-desktop.zip
+    sha256: c61edde261707f33376a28e9a30bb8c70c1a20bf0bd975206b809f3b3b70add5
+    include: ["*/otfs/*"]
+  - name: nerd-fonts-symbols-3.4.0
+    url: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.4.0/NerdFontsSymbolsOnly.tar.xz
+    sha256: 7f8c090da3b0eaa7108646bf34cbbb6ed13d5358a72460522108b06c7ecd716a
+    include: []
+
+system_services:
+  - NetworkManager
+  - bluetooth
+  - power-profiles-daemon
+
+greetd_user: _greetd
+greetd_vt: 7
+greetd_command: tuigreet --cmd start-hyprland --remember --time
+
+# Environment for every build: find what earlier entries installed, and use GCC 16.
+source_builds_env:
+  PATH: "/usr/local/bin:{{ ansible_facts.env.PATH }}"
+  PKG_CONFIG_PATH: /usr/local/lib/pkgconfig:/usr/local/share/pkgconfig
+  CMAKE_PREFIX_PATH: /usr/local
+  CC: gcc-16
+  CXX: g++-16
+
+# Built in this order, each into /usr/local unless the entry says otherwise. Every download is
+# checked against its sha256 (the Arch PKGBUILDs' values for the hypr* tarballs). A finished
+# entry leaves the stamp /usr/local/share/dots-build/<name>-<version>; bumping a version
+# here rebuilds only that entry. Versions are the Arch packages' versions at the time of
+# pinning (see git log for this file).
+cmake_build: >-
+  cmake -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local
+  -D CMAKE_INSTALL_LIBDIR=lib -D CMAKE_SKIP_RPATH=ON
+  && cmake --build build -j "$(nproc)"
+cmake_install: cmake --install build
+meson_build: >-
+  meson setup build --prefix=/usr/local --libdir=lib --buildtype=release
+  && meson compile -C build
+meson_install: meson install -C build
+
+source_builds:
+  - name: wayland  # wayland-protocols 1.49 needs wayland-scanner 1.25+ to generate its headers; Ubuntu ships 1.24
+    version: "1.26.0"
+    url: https://gitlab.freedesktop.org/wayland/wayland/-/releases/1.26.0/downloads/wayland-1.26.0.tar.xz
+    sha256: 64176eaa46e4969903e286f8e5ef8331affc17fdf03ac9b58381d2b23162b7a3
+    build: >-
+      meson setup build --prefix=/usr/local --libdir=lib --buildtype=release
+      -Ddocumentation=false -Dtests=false
+      && meson compile -C build
+    install: "{{ meson_install }}"
+  - name: wayland-protocols  # Hyprland needs 1.49, Ubuntu ships 1.47
+    version: "1.49"
+    url: https://gitlab.freedesktop.org/wayland/wayland-protocols/-/releases/1.49/downloads/wayland-protocols-1.49.tar.xz
+    sha256: ec4c8f74942d6dff7ace8b4ce4764f0ef9ff618a935d974ea77edee2ad240b14
+    build: >-
+      meson setup build --prefix=/usr/local --libdir=lib --buildtype=release -Dtests=false
+      && meson compile -C build
+    install: "{{ meson_install }}"
+  - name: lua  # Hyprland's config runtime needs 5.5; Ubuntu stops at 5.4. lua.org ships no .pc file.
+    version: "5.5.1"
+    url: https://www.lua.org/ftp/lua-5.5.1.tar.gz
+    sha256: 1c4b4068d67061f2a2231ad2b5422e77acea1487ea9890f6320af614f4373dce
+    build: make MYCFLAGS=-fPIC linux
+    install: >-
+      make INSTALL_TOP=/usr/local install
+      && printf '%s\n' 'prefix=/usr/local' 'libdir=${prefix}/lib' 'includedir=${prefix}/include' ''
+      'Name: Lua' 'Description: Lua 5.5' 'Version: 5.5.1'
+      'Libs: -L${libdir} -llua -lm -ldl' 'Cflags: -I${includedir}'
+      > /usr/local/lib/pkgconfig/lua5.5.pc
+  - name: hyprwayland-scanner
+    version: "0.4.6"
+    url: https://github.com/hyprwm/hyprwayland-scanner/archive/refs/tags/v0.4.6.tar.gz
+    sha256: 05f55fd1a20d8ca81b5030980fdb7c87147749230145bdb3745af2741d617f5c
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprutils
+    version: "0.14.1"
+    url: https://github.com/hyprwm/hyprutils/archive/v0.14.1/hyprutils-0.14.1.tar.gz
+    sha256: e8cfb093d8124de1e63d3635b7d749758d0919c2e1b3ce44462ef7ab003060c4
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprlang
+    version: "0.6.8"
+    url: https://github.com/hyprwm/hyprlang/archive/v0.6.8/hyprlang-0.6.8.tar.gz
+    sha256: d10a0778b646e04d83e8b90cc0f764fb96958c01a15c3c0678d95a40fc647ed5
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprwire
+    version: "0.3.1"
+    url: https://github.com/hyprwm/hyprwire/archive/v0.3.1/hyprwire-0.3.1.tar.gz
+    sha256: 92a673d40ae6a7d66fbcd0a34ec071e026e17eaeeb0040c3375e4b2a80dba737
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprcursor
+    version: "0.1.13"
+    url: https://github.com/hyprwm/hyprcursor/archive/v0.1.13/hyprcursor-0.1.13.tar.gz
+    sha256: 82af8b2ce27242ffdd6baebaa71b3f6c8665dc25c52bfcfccc16912622896af8
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprgraphics
+    version: "0.5.1"
+    url: https://github.com/hyprwm/hyprgraphics/archive/v0.5.1/hyprgraphics-0.5.1.tar.gz
+    sha256: 861ecaad872835922dd5745a612d7a4cc7bfc4babb1d06bc92bc63c2ac013b74
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: aquamarine
+    version: "0.15.0"
+    url: https://github.com/hyprwm/aquamarine/archive/v0.15.0/aquamarine-0.15.0.tar.gz
+    sha256: bb5323f58cd2f379cb11c39893336e49980fe2e9fb101745addd87cebde3d13d
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprland-protocols
+    version: "0.7.0"
+    url: https://github.com/hyprwm/hyprland-protocols/archive/v0.7.0/hyprland-protocols-0.7.0.tar.gz
+    sha256: ee419006d7cd20927b9b7c8b5fc430571c151b0385d600508de1a7957294498c
+    build: "{{ meson_build }}"
+    install: "{{ meson_install }}"
+  - name: hyprtoolkit
+    version: "0.5.4"
+    url: https://github.com/hyprwm/hyprtoolkit/archive/v0.5.4/hyprtoolkit-0.5.4.tar.gz
+    sha256: 2fb59789f231c1c4e9154ceffc1e7524c0cae154807c0d57e6166806255b570f
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprland-guiutils  # hyprland-dialog, which Hyprland uses for its own pop-ups
+    version: "0.2.2"
+    url: https://github.com/hyprwm/hyprland-guiutils/archive/v0.2.2/hyprland-guiutils-0.2.2.tar.gz
+    sha256: 16f92a6c5a22ac58e1fc313f6b202c188da45e804e1f21ff57dfd0da5c1a01b7
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprland
+    version: "0.56.2"
+    url: https://github.com/hyprwm/Hyprland/releases/download/v0.56.2/source-v0.56.2.tar.gz
+    sha256: 03ad3f5ef152ff44116ffd56fcf808486211ecabf4f0ba567108ee746ba5cd2e
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprsunset
+    version: "0.4.0"
+    url: https://github.com/hyprwm/hyprsunset/archive/v0.4.0/hyprsunset-0.4.0.tar.gz
+    sha256: 5980e65ec650010e36c52e5f5acc0df9fd2d20051c63b89305bdc13276f237a6
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprlauncher
+    version: "0.1.6"
+    url: https://github.com/hyprwm/hyprlauncher/archive/v0.1.6/hyprlauncher-0.1.6.tar.gz
+    sha256: f02f93584e1017d7a466d0cafed910f630be39eba6b433922e645c834c4abf59
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprpaper
+    version: "0.8.4"
+    url: https://github.com/hyprwm/hyprpaper/archive/v0.8.4/hyprpaper-0.8.4.tar.gz
+    sha256: 4912c7aede303918f38a3fc6b294429e2d541b639ebba67bcab58d1d367ea360
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hypridle
+    version: "0.1.8"
+    url: https://github.com/hyprwm/hypridle/archive/v0.1.8/hypridle-0.1.8.tar.gz
+    sha256: 08703613cc33cc796c2179bcaa6076e8618113f67b938daaf7535f90c7d39595
+    build: "{{ cmake_build }}"
+    install: "{{ cmake_install }}"
+  - name: hyprlock  # its PAM service file must land in /etc/pam.d, not /usr/local/etc
+    version: "0.9.6"
+    url: https://github.com/hyprwm/hyprlock/archive/v0.9.6/hyprlock-0.9.6.tar.gz
+    sha256: 7f653b87765bcfff7c1f8e04af326a7e73bbcacd1fb7d4436f6a16624a2247bb
+    build: >-
+      cmake -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local
+      -D CMAKE_INSTALL_LIBDIR=lib -D CMAKE_INSTALL_SYSCONFDIR=/etc -D CMAKE_SKIP_RPATH=ON
+      && cmake --build build -j "$(nproc)"
+    install: "{{ cmake_install }}"
+  - name: hyprland-qt-support  # QML style for hyprpolkitagent; must sit in Qt's import path
+    version: "0.1.0"
+    url: https://github.com/hyprwm/hyprland-qt-support/archive/v0.1.0/hyprland-qt-support-0.1.0.tar.gz
+    sha256: cac1f980bd088b890097f3f999cfdf03e73ee94c53f3c92d0b3bc23baa9e7b2c
+    build: >-
+      cmake -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local
+      -D CMAKE_INSTALL_LIBDIR=lib -D INSTALL_QMLDIR=/usr/lib/x86_64-linux-gnu/qt6/qml
+      -D CMAKE_SKIP_RPATH=ON
+      && cmake --build build -j "$(nproc)"
+    install: "{{ cmake_install }}"
+  - name: hyprpolkitagent
+    version: "0.1.3"
+    url: https://github.com/hyprwm/hyprpolkitagent/archive/v0.1.3/hyprpolkitagent-0.1.3.tar.gz
+    sha256: a8fa714b92d47331f056b608cb731dd1f5cc3845a9109cb22c6e6eb55b4eac84
+    build: >-
+      cmake -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr/local
+      -D CMAKE_INSTALL_LIBDIR=lib -D CMAKE_INSTALL_LIBEXECDIR=lib/hyprpolkitagent
+      -D CMAKE_SKIP_RPATH=ON
+      && cmake --build build -j "$(nproc)"
+    install: "{{ cmake_install }}"
+  - name: xdg-desktop-portal-hyprland
+    version: "1.4.1"
+    url: https://github.com/hyprwm/xdg-desktop-portal-hyprland/archive/v1.4.1/xdg-desktop-portal-hyprland-1.4.1.tar.gz
+    sha256: 3652c14f63a9666acea2c841e196782dbc0f74ea5b4783622dd04a32f08b709f
+    build: >-
+      cmake -B build -D CMAKE_BUILD_TYPE=Release -D CMAKE_INSTALL_PREFIX=/usr
+      -D CMAKE_INSTALL_LIBEXECDIR=/usr/lib -D CMAKE_SKIP_RPATH=ON
+      && cmake --build build -j "$(nproc)"
+    install: "{{ cmake_install }}"
+  - name: batsignal
+    version: "1.8.0"
+    url: https://github.com/electrickite/batsignal/archive/refs/tags/1.8.0.tar.gz
+    sha256: c8c2a048f4aa105aae389d9d765b76057d4998dbfc29a7dfeaf66351eaa7cba1
+    # Written for C17: its `void handler()` signal handler is a type error under GCC's C23 default.
+    build: CFLAGS=-std=gnu17 make
+    install: make PREFIX=/usr/local install

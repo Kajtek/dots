@@ -1,0 +1,51 @@
+# Files outside $HOME that the dotfiles assume: logind must leave the lid switch to
+# Hyprland (hyprlid/.local/bin/lid-handler.sh owns the policy), greetd is the login screen,
+# and a few services have to be enabled. Hardware-specific setup (GPU driver, swap for
+# hibernation) stays manual; see README.md.
+- name: Create the logind drop-in directory
+  ansible.builtin.file:
+    path: /etc/systemd/logind.conf.d
+    state: directory
+    mode: "0755"
+  become: true
+
+- name: Let Hyprland own the lid switch
+  ansible.builtin.copy:
+    src: logind-lid.conf
+    dest: /etc/systemd/logind.conf.d/10-lid.conf
+    mode: "0644"
+  become: true
+  notify: Reload logind
+
+- name: Configure greetd
+  ansible.builtin.template:
+    src: greetd-config.toml.j2
+    dest: /etc/greetd/config.toml
+    mode: "0644"
+  become: true
+
+- name: Install the Hyprland session that hosts regreet (Arch only)
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /etc/greetd/{{ item | regex_replace('^greetd-', '') }}
+    mode: "0644"
+  loop:
+    - greetd-hyprland.conf
+    - greetd-regreet.toml
+  become: true
+  when: ansible_facts.distribution == 'Archlinux'
+
+- name: Enable the login screen and the daemons the bars talk to
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    enabled: true
+  loop: "{{ ['greetd'] + system_services }}"
+  become: true
+  when: not in_container
+
+- name: Warn when hibernation has nowhere to go
+  ansible.builtin.debug:
+    msg: >-
+      No swap is active. batsignal calls `systemctl hibernate` at 5% battery, which needs a
+      swap partition at least as large as RAM; see README.md.
+  when: not in_container and ansible_facts.swaptotal_mb == 0

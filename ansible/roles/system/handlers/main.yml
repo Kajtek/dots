@@ -1,0 +1,5 @@
+- name: Reload logind
+  ansible.builtin.command: systemctl kill -s HUP systemd-logind.service
+  become: true
+  changed_when: true
+  when: not in_container

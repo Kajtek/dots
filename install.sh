@@ -52,6 +52,7 @@ PACKAGES=()
 for dir in "$REPO_ROOT"/*/; do
     [[ -d "$dir" ]] || continue
     dir_name="$(basename "$dir")"
+    [[ "$dir_name" == ansible ]] && continue   # the playbook, not a Stow package
     PACKAGES+=("$dir_name")
 done
 
