@@ -1,0 +1,10 @@
+# DP-5 is the connector the docking station shows up on. If the dock or cable
+# changes, get the new name from `hyprctl monitors`.
+profile undocked {
+    output eDP-1 enable
+}
+
+profile docked {
+    output DP-5 enable
+    output eDP-1 disable
+}
