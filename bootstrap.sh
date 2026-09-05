@@ -12,6 +12,13 @@
 # idempotent and re-runnable.
 set -euo pipefail
 
+# Everything below is meant for the user who will log in, never for root: the playbook
+# links dotfiles into $HOME and installs Claude Code there.
+if (( EUID == 0 )); then
+    echo "bootstrap: run this as the user who will log in, not as root" >&2
+    exit 1
+fi
+
 DOTS_REPO=${DOTS_REPO:-https://github.com/Kajtek/dots.git}
 DOTS_DIR=${DOTS_DIR:-$HOME/projects/dots}
 
@@ -33,9 +40,11 @@ elif [[ ! -d $DOTS_DIR/.git ]]; then
     git clone "$DOTS_REPO" "$DOTS_DIR"
 fi
 
-# Ask for the sudo password only when sudo needs one (containers and CI usually don't).
+# Ask for the sudo password unless sudo never needs one (containers, CI). -k ignores the
+# credentials cached by the package install above: that cache expires after a few minutes,
+# and the playbook, which compiles Hyprland on Ubuntu, runs far longer than that.
 ask_pass=()
-sudo -n true 2>/dev/null || ask_pass=(--ask-become-pass)
+sudo -nk true 2>/dev/null || ask_pass=(--ask-become-pass)
 
 cd "$DOTS_DIR/ansible"
 exec ansible-playbook "${ask_pass[@]}" playbook.yml "$@"
