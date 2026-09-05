@@ -10,6 +10,10 @@ on:
 permissions:
   contents: read
 
+defaults:
+  run:
+    shell: bash # -o pipefail: a failure before `| tee` must fail the step
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -29,7 +33,9 @@ jobs:
           ansible-lint
           ansible-playbook --syntax-check playbook.yml
       - name: shellcheck
-        run: shellcheck bootstrap.sh install.sh ansible/roles/dotfiles/files/stow-package.sh
+        run: >-
+          shellcheck bootstrap.sh install.sh ansible/roles/dotfiles/files/stow-package.sh
+          hyprlid/.local/bin/lid-handler.sh claude/.claude/statusline-command.sh
 
   secrets:
     runs-on: ubuntu-latest

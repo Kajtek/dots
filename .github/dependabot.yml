@@ -1,0 +1,8 @@
+# Keeps the SHA-pinned actions in ci.yml current; nothing else in this repo is a dependency
+# Dependabot understands (the source pins live in ansible/vars/Ubuntu.yml and are bumped by hand).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
