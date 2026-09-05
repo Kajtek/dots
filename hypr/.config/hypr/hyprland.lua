@@ -207,6 +207,8 @@ hl.config({
         force_default_wallpaper = 0,      -- Plain default wallpaper, no anime mascot (0 or 1); -1 picks at random
         disable_splash_rendering = true,  -- No random joke text drawn on the wallpaper
         disable_hyprland_logo   = false,  -- If true disables the random hyprland logo / anime girl background. :(
+        key_press_enables_dpms  = true,   -- Any key or mouse move relights a DPMS-off panel, independent of hypridle
+        mouse_move_enables_dpms = true,
     },
 })
 

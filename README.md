@@ -153,6 +153,9 @@ The pinned GitHub Actions in `.github/workflows/ci.yml` are kept current by Depe
 - **Hibernation.** batsignal calls `systemctl hibernate` at 5% battery. That needs a swap
   partition at least the size of RAM and either `resume=` on the kernel line or an
   initramfs that finds the image itself. The playbook warns when no swap is active.
+  hypridle relights the panel before hibernating and again after resume; if the screen
+  still stays black after a resume, switch VT (Ctrl+Alt+F2 and back) instead of pressing
+  the power key, which now suspends on a short press and powers off only when held.
 - **Docking station.** `kanshi/.config/kanshi/config` disables the laptop panel when `DP-5`
   is present. Another dock shows up under another name; read it from `hyprctl monitors`.
 - **Wallpaper.** hyprpaper starts without a config, so the desktop shows Hyprland's default.
