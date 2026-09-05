@@ -57,6 +57,19 @@
   changed_when: false
   failed_when: "'config ok' not in verify_config.stdout"
 
+# hyprlock authenticates through PAM service "hyprlock". Without that file PAM falls back to
+# "other", which denies everything, and the screen could be locked but never unlocked. Arch ships
+# it in the hyprlock package; on Ubuntu the source build installs it (CMAKE_INSTALL_SYSCONFDIR=/etc).
+- name: Check the PAM service hyprlock unlocks with
+  ansible.builtin.stat:
+    path: /etc/pam.d/hyprlock
+  register: verify_pam
+
+- name: Fail when hyprlock could lock but not unlock
+  ansible.builtin.assert:
+    that: verify_pam.stat.exists
+    fail_msg: /etc/pam.d/hyprlock is missing; hyprlock would refuse every password
+
 - name: Inspect the links Stow should have made
   ansible.builtin.stat:
     path: "{{ ansible_facts.user_dir }}/{{ item }}"

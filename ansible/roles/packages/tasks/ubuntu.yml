@@ -74,10 +74,11 @@
   when: not packages_wl_clip_persist.stat.exists
   block:
     - name: Build wl-clip-persist with cargo
+      # Pinned to the commit tag v0.5.0 points at; tags can be moved, commits cannot.
       ansible.builtin.command:
         cmd: >-
           cargo install --locked --git https://github.com/Linus789/wl-clip-persist
-          --tag v0.5.0 --root {{ build_root }}/wl-clip-persist
+          --rev e26fde01c13922e3a65049dafb7d5adfbc52626e --root {{ build_root }}/wl-clip-persist
       changed_when: true
 
     - name: Install wl-clip-persist
