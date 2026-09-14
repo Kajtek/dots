@@ -59,9 +59,9 @@ system_services:
   - bluetooth
   - power-profiles-daemon
 
-# greetd runs a minimal Hyprland session that hosts regreet (roles/system/files/greetd-hyprland.conf).
+# greetd runs a minimal Hyprland session that hosts regreet (roles/system/files/greetd-hyprland.lua).
 greetd_user: greeter
 greetd_vt: 1
-greetd_command: start-hyprland -- -c /etc/greetd/hyprland.conf
+greetd_command: start-hyprland -- -c /etc/greetd/hyprland.lua
 
 source_builds: []

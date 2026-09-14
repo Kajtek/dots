@@ -30,8 +30,17 @@
     dest: /etc/greetd/{{ item | regex_replace('^greetd-', '') }}
     mode: "0644"
   loop:
-    - greetd-hyprland.conf
+    - greetd-hyprland.lua
     - greetd-regreet.toml
+  become: true
+  when: ansible_facts.distribution == 'Archlinux'
+
+# The greeter session used hyprland.conf until Hyprland 0.56 deprecated that format; drop
+# this task once no machine still has the old file.
+- name: Remove the greeter's old hyprlang config
+  ansible.builtin.file:
+    path: /etc/greetd/hyprland.conf
+    state: absent
   become: true
   when: ansible_facts.distribution == 'Archlinux'
 
