@@ -1,3 +1,5 @@
 # Claude Code's settings.json stays a local file: Claude Code writes machine- and project-specific
 # details into it (its auto-mode environment scan names local paths and other projects).
 claude/.claude/settings.json
+# Claude Code's per-project permissions for this checkout; local by design.
+.claude/settings.local.json
