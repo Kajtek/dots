@@ -1,0 +1,11 @@
+/* Teal accent for GTK 4 / libadwaita apps, matching waybar, mako, kitty and the window borders.
+   libadwaita reads the CSS variables; the named colours cover apps on older stylesheets. */
+:root {
+    --accent-bg-color: #21D6C9;
+    --accent-fg-color: #000000;
+    --accent-color: #21D6C9;
+}
+
+@define-color accent_bg_color #21D6C9;
+@define-color accent_fg_color #000000;
+@define-color accent_color #21D6C9;

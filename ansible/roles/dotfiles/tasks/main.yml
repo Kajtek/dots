@@ -1,0 +1,28 @@
+# Link every Stow package into $HOME. Each top-level directory of the repo except ansible/
+# is a package; files/stow-package.sh handles one package and the only conflict a blank
+# machine produces (a distro default such as ~/.bashrc), so no interaction is needed.
+- name: Enable Git LFS for this user
+  ansible.builtin.command: git lfs install --skip-repo
+  changed_when: false
+
+- name: Fetch LFS objects (images go through LFS, see .gitattributes)
+  ansible.builtin.command:
+    cmd: git lfs pull
+    chdir: "{{ repo_root }}"
+  changed_when: false
+
+- name: Find the Stow packages
+  ansible.builtin.find:
+    paths: "{{ repo_root }}"
+    file_type: directory
+    excludes: ansible
+    recurse: false
+  register: dotfiles_packages
+
+- name: Stow each package
+  ansible.builtin.command:
+    cmd: "{{ role_path }}/files/stow-package.sh {{ item }}"
+    chdir: "{{ repo_root }}"
+  loop: "{{ dotfiles_packages.files | map(attribute='path') | map('basename') | sort }}"
+  register: dotfiles_stowed
+  changed_when: "'CHANGED' in dotfiles_stowed.stdout"

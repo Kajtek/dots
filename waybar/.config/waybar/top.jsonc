@@ -1,0 +1,155 @@
+// -*- mode: jsonc -*-
+// Top bar: workspaces on the left, connectivity/audio/power on the right.
+// Shares style.css and power_menu.xml with bottom.jsonc.
+{
+    "spacing": 4,
+    "modules-left": [
+        "hyprland/workspaces"
+    ],
+    "modules-right": [
+        "network",
+        "idle_inhibitor",
+        "backlight",
+        "pulseaudio",
+        "group/power"
+    ],
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "on-click": "activate",
+        "format-icons": {
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": "",
+            "5": "",
+            "urgent": "",
+            "active": "",
+            "default": ""
+        },
+        "sort-by-number": true,
+        "persistent-workspaces": {
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": []
+        }
+    },
+    "network": {
+        "format-wifi": "<span color='#21D6C9'></span> {essid}",
+        "format-ethernet": "<span color='#21D6C9'></span> {ipaddr}",
+        "tooltip-format": "{ifname}  {ipaddr}/{cidr} via {gwaddr}",
+        "tooltip-format-wifi": "{essid}  {signalStrength}%\n{ifname}  {ipaddr}/{cidr} via {gwaddr}",
+        "format-linked": "<span alpha='50%'></span> {ifname} (no IP)",
+        "format-disconnected": "<span alpha='50%'></span> offline",
+        "format-alt": "<span color='#21D6C9'></span> {ifname} {ipaddr}/{cidr}"
+    },
+    "idle_inhibitor": {
+        "format": "{icon}",
+        "format-icons": {
+            "activated": "<span color='#21D6C9'></span>",
+            "deactivated": "<span alpha='50%'></span>"
+        }
+    },
+    "backlight": {
+        "device": "intel_backlight",
+        "format": "<span color='#21D6C9'>{icon}</span> {percent}%",
+        "format-icons": [
+            "",
+            ""
+        ]
+    },
+    "pulseaudio": {
+        "format": "<span color='#21D6C9'>{icon}</span> {volume}%  {format_source}",
+        "format-bluetooth": "<span color='#21D6C9'>{icon}</span> {volume}%  {format_source}",
+        "format-bluetooth-muted": "<span alpha='50%'></span>  {format_source}",
+        "format-muted": "<span alpha='50%'></span>  {format_source}",
+        "format-source": "<span color='#21D6C9'></span> {volume}%",
+        "format-source-muted": "<span alpha='50%'></span>",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "",
+            "phone": "",
+            "portable": "",
+            "car": "",
+            "default": [
+                "",
+                "",
+                ""
+            ]
+        },
+        "on-click": "pavucontrol"
+    },
+    "group/power": {
+        "orientation": "horizontal",
+        "modules": [
+            "power-profiles-daemon",
+            "battery",
+            "custom/power"
+        ]
+    },
+    "power-profiles-daemon": {
+        "format": "<span color='#21D6C9'>{icon}</span>",
+        "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+        "tooltip": true,
+        "format-icons": {
+            "default": "",
+            "performance": "",
+            "balanced": "",
+            "power-saver": ""
+        }
+    },
+    "battery": {
+        "interval": 60,
+        "states": {
+            "warning": 20,
+            "critical": 10
+        },
+        // Low charge drops the teal icon so the whole reading turns orange (style.css).
+        "format": "<span color='#21D6C9'>{icon}</span> {capacity}%",
+        "format-charging": "<span color='#21D6C9'>{icon}</span> {capacity}%",
+        "format-warning": "{icon} {capacity}%",
+        "format-critical": "{icon} {capacity}%",
+        "format-icons": {
+            "default": [
+                "󰂎",
+                "󰁺",
+                "󰁻",
+                "󰁼",
+                "󰁽",
+                "󰁾",
+                "󰁿",
+                "󰂀",
+                "󰂁",
+                "󰂂",
+                "󰁹"
+            ],
+            "charging": [
+                "󰢟",
+                "󰢜",
+                "󰂆",
+                "󰂇",
+                "󰂈",
+                "󰢝",
+                "󰂉",
+                "󰢞",
+                "󰂊",
+                "󰂋",
+                "󰂅"
+            ]
+        }
+    },
+    "custom/power": {
+        "format": "<span color='#21D6C9'>⏻</span>",
+        "tooltip": false,
+        "menu": "on-click",
+        "menu-file": "~/.config/waybar/power_menu.xml",
+        "menu-actions": {
+            "shutdown": "systemctl poweroff",
+            "reboot": "systemctl reboot",
+            "suspend": "systemctl suspend",
+            "hibernate": "systemctl hibernate"
+        }
+    }
+}

@@ -1,0 +1,16 @@
+# Login screen (regreet, a GTK 4 app run by greetd). Same look as the desktop: the gtk package's
+# theme, icons, cursor and font, plus regreet.css for the teal accent and the glass card.
+
+[GTK]
+application_prefer_dark_theme = true
+theme_name = "adw-gtk3-dark"
+icon_theme_name = "Adwaita"
+cursor_theme_name = "Breeze_Light"
+font_name = "Hack 12"
+
+[widget.clock]
+format = "%H:%M"
+
+[commands]
+reboot = [ "systemctl", "reboot" ]
+poweroff = [ "systemctl", "poweroff" ]

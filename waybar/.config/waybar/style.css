@@ -1,0 +1,161 @@
+/* Shared by top.jsonc, bottom.jsonc and procs.jsonc. One look across the desktop:
+   - glass: translucent black that Hyprland blurs (layer rule in hyprland.lua), 2px #21D6C9 border;
+   - Hack, as in kitty, mako and hyprlock; the Nerd Font build carries the icons, and its fixed-width
+     digits keep the bars from shifting as numbers change;
+   - colour: icons teal (set with Pango spans in the .jsonc formats), values white, anything off or
+     muted at half alpha, and #FF6633 only for a reading that needs attention.
+   mako/config repeats these colours; change them together. */
+
+* {
+    font-family: "Hack Nerd Font Propo", Hack, FontAwesome, sans-serif;
+    font-size: 14px;
+}
+
+window#waybar {
+    background-color: transparent;
+    color: #ffffff;
+    transition-property: background-color;
+    transition-duration: .5s;
+}
+
+/* Pill look for every standalone module and for each group box.
+   Groups don't get the .module class, so they are listed by id. */
+.module,
+#power,
+#hardware {
+    background-color: rgba(0, 0, 0, 0.6);
+    background-clip: padding-box;
+    border-radius: 20px;
+    border: 2px solid #21D6C9;
+    padding: 5px 14px;
+}
+
+/* Modules inside a group are plain readings on the group's glass, spaced like table columns. */
+#power,
+#hardware {
+    padding: 5px 7px;
+}
+
+#power .module,
+#hardware .module {
+    background-color: transparent;
+    border: 0px;
+    padding: 0px;
+    margin: 0px 7px;
+}
+
+#workspaces,
+#taskbar,
+#tray {
+    padding: 3px 6px;
+}
+
+#taskbar.empty {
+    background-color: transparent;
+    border: 0px;
+}
+
+/* Workspace and taskbar buttons share one treatment: a teal ring when active, a teal tint on
+   hover. The idle border is transparent so turning active doesn't shift the layout. */
+#workspaces button,
+#taskbar button {
+    border-radius: 20px;
+    background-clip: padding-box;
+    border: 1px solid transparent;
+    box-shadow: none;
+    text-shadow: none;
+}
+
+#workspaces button:hover,
+#taskbar button:hover {
+    background-image: none;
+    background-color: rgba(33, 214, 201, 0.15);
+}
+
+#workspaces button.active,
+#taskbar button.active {
+    border-color: #21D6C9;
+}
+
+/* Workspaces show where windows are: occupied ones white, empty ones faded, one that asks for
+   attention orange. */
+#workspaces button {
+    color: #ffffff;
+}
+
+#workspaces button.empty {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+#workspaces button.urgent {
+    color: #FF6633;
+}
+
+/* Thresholds come from "states" in the .jsonc files, which also drop the teal icon in that
+   state, so the whole reading turns orange. batsignal sends the battery notifications. */
+#cpu.warning,
+#custom-gpu.warning,
+#memory.warning,
+#disk.warning,
+#temperature.critical,
+#battery.warning:not(.charging) {
+    color: #FF6633;
+}
+
+#battery.critical:not(.charging) {
+    color: #FF6633;
+    animation: blink 1s steps(2) infinite;
+}
+
+@keyframes blink {
+    to { color: #ffffff; }
+}
+
+/* Popups (tooltips, the calendar, the power menu) are cards: same border and window radius as
+   the process card, but nearly opaque, since they open over windows whose text would show through. */
+tooltip,
+menu {
+    background-color: rgba(0, 0, 0, 0.92);
+    border: 2px solid #21D6C9;
+    border-radius: 12px;
+}
+
+tooltip label {
+    color: #ffffff;
+    padding: 4px 6px;
+}
+
+menu {
+    padding: 6px;
+}
+
+/* The menu sits in a square popup window; clear it so only the rounded card shows. */
+window.popup,
+window.popup decoration {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+menuitem {
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 8px;
+}
+
+menuitem:hover {
+    background-color: rgba(33, 214, 201, 0.2);
+}
+
+menu separator {
+    background-color: rgba(33, 214, 201, 0.3);
+    min-height: 1px;
+    margin: 4px 8px;
+}
+
+/* procs.jsonc: a desktop card rather than a pill, so it takes the window radius (12px, as in
+   hyprland.lua and mako); a round pill would clip a multi-line table. The colours live in
+   top-procs.sh. */
+window#waybar.procs #custom-procs {
+    border-radius: 12px;
+    padding: 10px 14px;
+}

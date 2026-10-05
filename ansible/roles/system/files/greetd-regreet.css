@@ -1,0 +1,22 @@
+/* Login screen styling, loaded by regreet from /etc/greetd/regreet.css. Matches the lock screen
+   and waybar: near-black backdrop, a translucent black card with the 2px teal border and 12px
+   window radius, teal accent on buttons and focus. */
+@define-color accent_color #21D6C9;
+@define-color accent_bg_color #21D6C9;
+@define-color accent_fg_color #000000;
+/* Reboot and Power Off are "destructive"; the desktop's attention colour is orange, not red. */
+@define-color destructive_color #FF6633;
+@define-color destructive_bg_color #FF6633;
+@define-color destructive_fg_color #000000;
+
+window {
+    background-color: #000000;
+    background-image: radial-gradient(circle at 50% 40%, #0f1a1f, #000000 70%);
+}
+
+frame {
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 2px solid #21D6C9;
+    border-radius: 12px;
+    padding: 12px;
+}

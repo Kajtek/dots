@@ -1,0 +1,5 @@
+/* Teal accent for GTK 3 apps, matching waybar, mako, kitty and the window borders.
+   adw-gtk3 (settings.ini) reads libadwaita's accent names, so the same three lines as gtk-4.0. */
+@define-color accent_color #21D6C9;
+@define-color accent_bg_color #21D6C9;
+@define-color accent_fg_color #000000;

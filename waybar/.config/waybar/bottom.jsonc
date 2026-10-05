@@ -1,0 +1,101 @@
+// -*- mode: jsonc -*-
+// Bottom bar: hardware stats on the left, taskbar in the middle, tray and clock on the right.
+// Shares style.css with top.jsonc.
+{
+    "position": "bottom",
+    "spacing": 4,
+    "modules-left": [
+        "group/hardware"
+    ],
+    "modules-center": [
+        "wlr/taskbar"
+    ],
+    "modules-right": [
+        "tray",
+        "clock"
+    ],
+    "group/hardware": {
+        "orientation": "horizontal",
+        "modules": [
+            "cpu",
+            "custom/gpu",
+            "memory",
+            "disk",
+            "temperature"
+        ]
+    },
+    // Each reading has a plain variant for its warning state, so the whole reading turns
+    // orange there (style.css), the same orange the process card and battery use.
+    "cpu": {
+        "states": { "warning": 80 },
+        "format": "<span color='#21D6C9'></span> {usage}%",
+        "format-warning": " {usage}%",
+        "tooltip": false
+    },
+    // gpu.sh decides the warning itself ("states" had no effect here), so the format is just {}.
+    "custom/gpu": {
+        "exec": "~/.config/waybar/scripts/gpu.sh",
+        "return-type": "json",
+        "interval": 5,
+        "tooltip": false
+    },
+    "memory": {
+        "states": { "warning": 85 },
+        "format": "<span color='#21D6C9'></span> {percentage}%",
+        "format-warning": " {percentage}%"
+    },
+    "disk": {
+        "interval": 30,
+        "states": { "warning": 90 },
+        "format": "<span color='#21D6C9'></span> {percentage_used}%",
+        "format-warning": " {percentage_used}%",
+        "path": "/"
+    },
+    "temperature": {
+        "critical-threshold": 80,
+        "format": "<span color='#21D6C9'>{icon}</span> {temperatureC}°C",
+        "format-critical": "{icon} {temperatureC}°C",
+        "format-icons": [
+            "",
+            "",
+            ""
+        ]
+    },
+    "wlr/taskbar": {
+        "format": "{icon}",
+        // List every window, not just those Hyprland reports on this bar's output: windows moved
+        // off eDP-1 when docking are never announced on DP-5, so they would vanish. kanshi never
+        // lights both screens at once, so nothing is lost.
+        "all-outputs": true,
+        "icon-size": 24,
+        "tooltip-format": "{title}",
+        "on-click": "activate",
+        "on-click-middle": "close"
+    },
+    "tray": {
+        "icon-size": 24,
+        "spacing": 4
+    },
+    "clock": {
+        "format": "<span color='#21D6C9'></span> {:%H:%M}",
+        "format-alt": "<span color='#21D6C9'></span> {:%A, %d %B %Y  %H:%M}",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "calendar": {
+            "mode": "year",
+            "mode-mon-col": 3,
+            "weeks-pos": "right",
+            "on-scroll": 1,
+            "format": {
+                // Same palette as the bars: teal accents, white days, dimmed week numbers.
+                "months": "<span color='#21D6C9'><b>{}</b></span>",
+                "days": "{}",
+                "weeks": "<span alpha='50%'>W{}</span>",
+                "weekdays": "<span color='#21D6C9' alpha='70%'>{}</span>",
+                "today": "<span color='#21D6C9'><b><u>{}</u></b></span>"
+            }
+        },
+        "actions": {
+            "on-click-right": "mode"
+        }
+    }
+}

@@ -1,0 +1,23 @@
+// -*- mode: jsonc -*-
+// Desktop card, not a bar: the five busiest processes in the bottom-left corner, just above
+// the bottom bar's hardware pill. It sits on the "bottom" layer, so windows cover it; with no
+// exclusive zone tiled windows ignore it, and passthrough hands clicks to whatever is under it.
+// Shares style.css with the bars (rules under window#waybar.procs); hyprland.lua starts it.
+{
+    "name": "procs",
+    "layer": "bottom",
+    "position": "bottom",
+    "exclusive": false,
+    "passthrough": true,
+    "margin-left": 0,
+    "margin-bottom": 6,
+    "modules-left": [
+        "custom/procs"
+    ],
+    "custom/procs": {
+        "exec": "~/.config/waybar/scripts/top-procs.sh",
+        "return-type": "json",
+        "interval": 3,
+        "tooltip": false
+    }
+}

@@ -1,0 +1,61 @@
+# One AUR package: skip when pacman already knows it, otherwise clone the PKGBUILD, install
+# its dependencies from the repos as root, build as the user, install the result as root.
+# Updates are left to the user (yay -Syu); this only gets a blank machine to parity.
+- name: Check whether pacman knows {{ aur_pkg }}
+  ansible.builtin.command: pacman -Q {{ aur_pkg }}
+  register: packages_aur_query
+  changed_when: false
+  failed_when: false
+
+- name: Build from the AUR {{ aur_pkg }}
+  when: packages_aur_query.rc != 0
+  vars:
+    aur_dir: "{{ build_root }}/{{ aur_pkg }}"
+  block:
+    - name: Clone the PKGBUILD of {{ aur_pkg }}
+      ansible.builtin.git:
+        repo: https://aur.archlinux.org/{{ aur_pkg }}.git
+        dest: "{{ aur_dir }}"
+        depth: 1
+        version: master
+
+    - name: Read the dependencies of {{ aur_pkg }}
+      ansible.builtin.command:
+        cmd: makepkg --printsrcinfo
+        chdir: "{{ aur_dir }}"
+      register: packages_srcinfo
+      changed_when: false
+
+    - name: Install from the repos the dependencies of {{ aur_pkg }}
+      community.general.pacman:
+        # "depends = gtk3>=3.0" lines become "gtk3"; makepkg itself needs them present.
+        name: >-
+          {{ packages_srcinfo.stdout_lines | map('trim')
+             | select('match', '^(make)?depends = ')
+             | map('regex_replace', '^(make)?depends = ([^<>=]+).*$', '\2') | list }}
+        state: present
+      become: true
+
+    - name: Build {{ aur_pkg }}
+      ansible.builtin.command:
+        cmd: makepkg --noconfirm --force
+        chdir: "{{ aur_dir }}"
+      changed_when: true
+
+    - name: Find the built package of {{ aur_pkg }}
+      ansible.builtin.find:
+        paths: "{{ aur_dir }}"
+        patterns: "*.pkg.tar.zst"
+        excludes: "*-debug-*"
+      register: packages_built
+
+    - name: Install the built package of {{ aur_pkg }}
+      community.general.pacman:
+        name: "{{ packages_built.files | map(attribute='path') | list }}"
+        state: present
+      become: true
+
+    - name: Remove the build tree of {{ aur_pkg }}
+      ansible.builtin.file:
+        path: "{{ aur_dir }}"
+        state: absent

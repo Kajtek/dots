@@ -1,0 +1,20 @@
+# Arch: a full upgrade first (partial upgrades are unsupported on Arch), then the repo
+# list, then each AUR package through makepkg. yay is deliberately not used here: it
+# calls sudo internally, which would hang waiting for a password nobody can see.
+- name: Upgrade the system
+  community.general.pacman:
+    update_cache: true
+    upgrade: true
+  become: true
+
+- name: Install repo packages
+  community.general.pacman:
+    name: "{{ pacman_packages }}"
+    state: present
+  become: true
+
+- name: Build and install AUR packages
+  ansible.builtin.include_tasks: aur.yml
+  loop: "{{ aur_packages }}"
+  loop_control:
+    loop_var: aur_pkg

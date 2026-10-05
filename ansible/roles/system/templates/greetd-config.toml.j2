@@ -1,0 +1,7 @@
+# Installed by the dots playbook (ansible/roles/system); greeter and user differ per distro.
+[terminal]
+vt = {{ greetd_vt }}
+
+[default_session]
+command = "{{ greetd_command }}"
+user = "{{ greetd_user }}"
