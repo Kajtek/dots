@@ -1,11 +1,36 @@
 #!/bin/bash
-# Claude Code status line: shows model name, git branch, and session token
-# usage against the context window limit,
-# e.g. "Fable | feat/login* | 42.2k / 200k tokens (21%)".
+# Claude Code status line: shows model name, reasoning effort, git branch,
+# session token usage against the context window limit, and subscription
+# rate-limit usage with reset times,
+# e.g. "Fable high | feat/login* | 42.2k / 200k tokens (21%) | 5h 23% ↻14:30 | 7d 41% ↻Fri 09 Oct 09:00".
+# Segments whose data is absent (no effort support, no Pro/Max rate limits,
+# or before the session's first API response) are simply left out.
 
 input=$(cat)
 
 model=$(echo "$input" | jq -r '.model.display_name // "Claude"')
+effort=$(echo "$input" | jq -r '.effort.level // empty')
+[ -n "$effort" ] && model="$model $effort"
+
+# Rate-limit windows: the rolling 5-hour session limit and the weekly limit.
+# The 5h reset shows only the time when it falls today; the weekly one
+# always carries the day and date.
+limit_seg() {
+  local label=$1 window=$2 pct resets when
+  pct=$(echo "$input" | jq -r ".rate_limits.$window.used_percentage // empty")
+  [ -z "$pct" ] && return
+  resets=$(echo "$input" | jq -r ".rate_limits.$window.resets_at // empty")
+  printf " | %s %s%%" "$label" "$(awk -v p="$pct" 'BEGIN { printf "%.0f", p }')"
+  if [ -n "$resets" ]; then
+    if [ "$window" = five_hour ] && [ "$(date -d "@$resets" +%F)" = "$(date +%F)" ]; then
+      when=$(date -d "@$resets" +%H:%M)
+    else
+      when=$(date -d "@$resets" '+%a %d %b %H:%M')
+    fi
+    printf " ↻%s" "$when"
+  fi
+}
+limits_seg="$(limit_seg 5h five_hour)$(limit_seg 7d seven_day)"
 
 # Git branch of the workspace dir, with "*" when the tree is dirty.
 # Shown in red on main/master as a "you are about to work on main" warning.
@@ -55,7 +80,7 @@ if [ -n "$limit_tokens" ] && [ "$limit_tokens" != "0" ]; then
     pct_fmt=$(awk -v u="$used_tokens" -v l="$limit_tokens" 'BEGIN { printf "%.0f", (u / l) * 100 }')
   fi
 
-  printf "\033[2m%s | %s%s / %s tokens (%s%%)\033[0m" "$model" "$branch_seg" "$used_fmt" "$limit_fmt" "$pct_fmt"
+  printf "\033[2m%s | %s%s / %s tokens (%s%%)%s\033[0m" "$model" "$branch_seg" "$used_fmt" "$limit_fmt" "$pct_fmt" "$limits_seg"
 else
-  printf "\033[2m%s | %s%s tokens\033[0m" "$model" "$branch_seg" "$used_fmt"
+  printf "\033[2m%s | %s%s tokens%s\033[0m" "$model" "$branch_seg" "$used_fmt" "$limits_seg"
 fi
