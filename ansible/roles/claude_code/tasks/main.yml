@@ -14,6 +14,10 @@
         url: https://claude.ai/install.sh
         dest: "{{ build_root }}/claude-install.sh"
         mode: "0755"
+      register: claude_code_installer_download
+      until: claude_code_installer_download is succeeded
+      retries: 3
+      delay: 10
 
     - name: Run the installer
       ansible.builtin.command: bash {{ build_root }}/claude-install.sh

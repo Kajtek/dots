@@ -44,6 +44,10 @@
   loop: "{{ fonts }}"
   loop_control:
     label: "{{ item.name }}"
+  register: packages_font_download
+  until: packages_font_download is succeeded
+  retries: 3
+  delay: 10
 
 - name: Create a directory per font family
   ansible.builtin.file:
@@ -74,6 +78,10 @@
   loop: "{{ gtk_themes }}"
   loop_control:
     label: "{{ item.name }}"
+  register: packages_theme_download
+  until: packages_theme_download is succeeded
+  retries: 3
+  delay: 10
 
 - name: Create the user theme directory
   ansible.builtin.file:
