@@ -326,6 +326,8 @@ hl.bind(mainMod .. " + L",      hl.dsp.exec_cmd("loginctl lock-session")) -- hyp
 hl.bind(mainMod .. " + P",      hl.dsp.window.pseudo())         -- dwindle
 hl.bind(mainMod .. " + J",      hl.dsp.layout("togglesplit"))   -- dwindle
 hl.bind(mainMod .. " + F",      hl.dsp.window.fullscreen())
+-- Toggle the process card above windows (procs-front.jsonc): kill the raised copy, or start it
+hl.bind(mainMod .. " + T",      hl.dsp.exec_cmd("pkill -xf \"waybar -c $HOME/.config/waybar/procs-front.jsonc\" || waybar -c $HOME/.config/waybar/procs-front.jsonc"))
 
 -- Move focus with mainMod + arrow keys
 hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
