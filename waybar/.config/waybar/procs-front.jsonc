@@ -1,0 +1,10 @@
+// -*- mode: jsonc -*-
+// The process card, raised above windows for a glance. Super+T in hyprland.lua starts this
+// instance and the next Super+T kills it; the card on the "bottom" layer keeps running behind.
+// waybar cannot move a running card between layers, so this is a second copy on the "overlay"
+// layer (above fullscreen windows too). Values here win over the included file, and keeping
+// name "procs" keeps its style.css rules and blur rule.
+{
+    "include": "~/.config/waybar/procs.jsonc",
+    "layer": "overlay"
+}
