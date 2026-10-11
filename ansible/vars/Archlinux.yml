@@ -22,6 +22,7 @@ pacman_packages:
   - qt6-wayland
   - waybar
   - mako
+  - python-gobject  # waybar/scripts/sni-watcher.py, the tray watcher hyprland.lua starts
   - kanshi
   - kitty
   - starship

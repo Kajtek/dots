@@ -60,8 +60,13 @@ hl.on("hyprland.start", function()
     -- The output is held in a variable and written only after exit: redirecting straight into the
     -- log would truncate it as the next run starts, erasing the crashed run's output.
     -- "procs" is the top-processes desktop card; it is a waybar instance too, so it rides along.
+    -- Tray icons register with the StatusNotifierWatcher. waybar's tray would own it and lose
+    -- every registration on each restart, so sni-watcher.py owns it instead and the bars wait
+    -- (at most 5 s) for it to appear; otherwise waybar would claim the name first.
+    hl.exec_cmd("$HOME/.config/waybar/scripts/sni-watcher.py")
     for _, bar in ipairs({ "top", "bottom", "procs" }) do
-        hl.exec_cmd("while kill -0 $PPID 2>/dev/null; do"
+        hl.exec_cmd("timeout 5 sh -c 'until busctl --user status org.kde.StatusNotifierWatcher >/dev/null 2>&1; do sleep 0.1; done';"
+            .. " while kill -0 $PPID 2>/dev/null; do"
             .. " out=$( { waybar -c $HOME/.config/waybar/" .. bar .. ".jsonc; echo \"waybar exited: $?\"; } 2>&1 | tail -n 200 );"
             .. " printf '%s\\n' \"$out\" > $HOME/.cache/waybar-" .. bar .. ".log; sleep 1; done")
     end
@@ -75,7 +80,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("flameshot")                                   -- Screenshot applet
     hl.exec_cmd("blueman-applet")                              -- Bluetooth manager applet
     -- Signal IM. Electron creates its tray icon once at startup and never retries, so wait
-    -- (at most 30 s) until waybar owns the StatusNotifierWatcher; otherwise the icon is lost.
+    -- (at most 30 s) until sni-watcher.py owns the StatusNotifierWatcher; otherwise the icon is lost.
     hl.exec_cmd("timeout 30 sh -c 'until busctl --user status org.kde.StatusNotifierWatcher >/dev/null 2>&1; do sleep 0.2; done'; signal-desktop")
     hl.exec_cmd("kanshi")                                      -- Monitors manager
     -- GTK on Wayland reads its theme from gsettings, not gtk-3.0/settings.ini, and libadwaita apps
