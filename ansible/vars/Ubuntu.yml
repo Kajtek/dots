@@ -67,6 +67,7 @@ apt_packages:
   - polkitd
   - libnotify-bin
   - libglib2.0-bin  # gsettings, which hyprland.lua calls to set the GTK theme
+  - python3-gi      # waybar/scripts/sni-watcher.py, the tray watcher hyprland.lua starts
   - adwaita-icon-theme   # the icon theme set in gtk/ and hyprland.lua
   - breeze-cursor-theme  # cursor for Hyprland and GTK (Breeze_Light)
   - greetd
