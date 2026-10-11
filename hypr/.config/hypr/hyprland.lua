@@ -87,6 +87,13 @@ hl.on("hyprland.start", function()
         .. " gsettings set org.gnome.desktop.interface cursor-theme Breeze_Light")
 end)
 
+-- Workaround for a waybar 0.15 bug: plugging in the dock adds DP-5 and kanshi disables eDP-1 a
+-- moment later, and a bar caught in that swap can end up with no surface on any output while its
+-- process keeps running, so the respawn loop above never fires. Restart every bar after each
+-- monitor change instead; the 1 s gives kanshi time to finish. Drop this once waybar is fixed.
+hl.on("monitor.added",   function() hl.exec_cmd("sleep 1; pkill -x waybar") end)
+hl.on("monitor.removed", function() hl.exec_cmd("sleep 1; pkill -x waybar") end)
+
 
 -------------------------------
 ---- ENVIRONMENT VARIABLES ----
