@@ -11,12 +11,18 @@
     src_dir: "{{ build_root }}/{{ pkg.name }}-{{ pkg.version }}"
     tarball: "{{ build_root }}/{{ pkg.name }}-{{ pkg.version }}.{{ pkg.url | regex_search('tar\\.(gz|xz)$') }}"
   block:
+    # Upstream hosts drop out for seconds at a time (CI once lost DNS for www.lua.org
+    # mid-run), so every download in the playbook retries before failing the bring-up.
     - name: Download {{ pkg.url }}
       ansible.builtin.get_url:
         url: "{{ pkg.url }}"
         dest: "{{ tarball }}"
         mode: "0644"
         checksum: "sha256:{{ pkg.sha256 }}"
+      register: source_builds_download
+      until: source_builds_download is succeeded
+      retries: 3
+      delay: 10
 
     # A tree left behind by a failed attempt would make `meson setup` reuse its stale
     # configuration instead of reconfiguring, so every attempt starts from a clean extract.
