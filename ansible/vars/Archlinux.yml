@@ -8,6 +8,7 @@ pacman_packages:
   - git-lfs
   - stow
   - jq
+  - libnotify      # notify-send, for hypr/.config/hypr/display-mode.sh
   # Hyprland and the daemons hypr/.config/hypr/hyprland.lua starts
   - hyprland
   - hyprpaper

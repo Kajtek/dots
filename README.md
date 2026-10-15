@@ -103,7 +103,7 @@ that write landing in the repo.
 
 | Package | What it holds |
 |---|---|
-| `hypr` | `hyprland.lua`, `hypridle.conf`, `hyprlock.conf` |
+| `hypr` | `hyprland.lua`, `hypridle.conf`, `hyprlock.conf`, `display-mode.sh` (Super+P: PC screen only / Duplicate / Extend / Second screen only, like Windows+P) |
 | `hyprlid` | `lid-handler.sh`: suspend, or turn the panel off when docked on AC |
 | `waybar` | `top.jsonc`, `bottom.jsonc`, shared `style.css` and the power menu |
 | `mako`, `kanshi`, `kitty`, `starship`, `bashrc` | one config each |
@@ -158,6 +158,8 @@ The pinned GitHub Actions in `.github/workflows/ci.yml` are kept current by Depe
   the power key, which now suspends on a short press and powers off only when held.
 - **Docking station.** `kanshi/.config/kanshi/config` disables the laptop panel when `DP-5`
   is present. Another dock shows up under another name; read it from `hyprctl monitors`.
+  Super+P switches to another layout until the next plug-in (kanshi profiles `laptop`,
+  `extend`, `second`; Duplicate adds a Hyprland mirror on top of `extend`).
 - **Wallpaper.** hyprpaper starts without a config, so the desktop shows Hyprland's default.
   Add `~/.config/hypr/hyprpaper.conf` to the `hypr` package if you want one.
 - **Accounts.** Git identity, SSH keys, Claude Code login, browser profiles.

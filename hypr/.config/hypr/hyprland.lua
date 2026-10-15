@@ -328,7 +328,8 @@ hl.bind(mainMod .. " + M",      hl.dsp.exec_cmd("command -v hyprshutdown >/dev/n
 hl.bind(mainMod .. " + V",      hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + R",      hl.dsp.exec_cmd(menu))
 hl.bind(mainMod .. " + L",      hl.dsp.exec_cmd("loginctl lock-session")) -- hypridle's lock_cmd, so never two hyprlocks
-hl.bind(mainMod .. " + P",      hl.dsp.window.pseudo())         -- dwindle
+hl.bind(mainMod .. " + P",      hl.dsp.exec_cmd("~/.config/hypr/display-mode.sh")) -- like Windows+P
+hl.bind(mainMod .. " + SHIFT + P", hl.dsp.window.pseudo())      -- dwindle
 hl.bind(mainMod .. " + J",      hl.dsp.layout("togglesplit"))   -- dwindle
 hl.bind(mainMod .. " + F",      hl.dsp.window.fullscreen())
 -- Toggle the process card above windows (procs-front.jsonc): kill the raised copy, or start it

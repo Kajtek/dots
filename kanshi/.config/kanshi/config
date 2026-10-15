@@ -8,3 +8,23 @@ profile docked {
     output DP-5 enable
     output eDP-1 disable
 }
+
+# Super+P (hypr/.config/hypr/display-mode.sh) switches to the profiles below with
+# `kanshictl switch`, like Windows+P; the next hotplug picks a profile from the top again.
+# Hyprland itself cannot re-enable an output kanshi disabled, so kanshi owns enable/disable
+# for every mode. Duplicate is extend plus a Hyprland mirror rule, which kanshi cannot express.
+# "extend" is also what any monitor other than the dock gets on plug-in.
+profile extend {
+    output eDP-1 enable
+    ...output * enable
+}
+
+profile laptop {
+    output eDP-1 enable
+    ...output * disable
+}
+
+profile second {
+    output eDP-1 disable
+    ...output * enable
+}
