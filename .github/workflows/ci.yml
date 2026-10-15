@@ -35,7 +35,8 @@ jobs:
       - name: shellcheck
         run: >-
           shellcheck bootstrap.sh install.sh ansible/roles/dotfiles/files/stow-package.sh
-          hyprlid/.local/bin/lid-handler.sh claude/.claude/statusline-command.sh
+          hyprlid/.local/bin/lid-handler.sh hypr/.config/hypr/display-mode.sh
+          claude/.claude/statusline-command.sh
 
   secrets:
     runs-on: ubuntu-latest
