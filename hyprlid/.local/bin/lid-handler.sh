@@ -4,8 +4,13 @@
 #   closed, on battery            -> suspend
 #   closed, on AC, external screen -> turn the internal panel off, keep working
 #   closed, on AC, no external     -> suspend
-#   open                           -> turn the internal panel back on
-# kanshi already disables the panel while docked, so the "open" branch only matters undocked.
+#   open, external screen          -> extend: panel back on next to the external screens
+#   open, no external              -> kanshi's automatic layout (the panel alone)
+# kanshi turns outputs on and off here, as for Super+P: a Hyprland monitor rule cannot re-enable
+# an output that is off, and once kanshi has changed an output Hyprland skips a rule it thinks
+# is already applied. kanshi's "second" and "extend" profiles also match with no external screen
+# (and "second" would then leave no screen at all), so they are only used after checking for one.
+# `kanshictl reload` picks the first matching profile again, the same one a plug-in would.
 set -euo pipefail
 
 INTERNAL="eDP-1"
@@ -21,16 +26,21 @@ ac_online() {
     echo 0
 }
 
+# Connected external screens, on or off. FALLBACK is Hyprland's stand-in output while no real
+# one is on, not a screen.
 external_monitors() {
-    hyprctl monitors -j | jq --arg int "$INTERNAL" '[.[] | select(.name != $int)] | length'
+    hyprctl monitors all -j \
+        | jq --arg int "$INTERNAL" '[.[] | select(.name != $int and .name != "FALLBACK")] | length'
 }
 
 if [[ "$(lid_state)" == "closed" ]]; then
     if [[ "$(ac_online)" == "1" && "$(external_monitors)" -gt 0 ]]; then
-        hyprctl eval "hl.monitor({ output = \"$INTERNAL\", disabled = true })"
+        kanshictl switch second
     else
         systemctl suspend
     fi
+elif [[ "$(external_monitors)" -gt 0 ]]; then
+    kanshictl switch extend
 else
-    hyprctl eval "hl.monitor({ output = \"$INTERNAL\", mode = \"preferred\", position = \"auto\", scale = 1.5 })"
+    kanshictl reload
 fi
