@@ -8,9 +8,9 @@
 ------------------
 
 -- See https://wiki.hypr.land/Configuring/Basics/Monitors/
--- The laptop panel is 144 PPI, so 1.5 gives ~96 logical PPI there. lid-handler.sh re-applies this rule
--- when the lid opens; keep them in sync. Every other output gets its scale from its PPI (below) so
--- gaps, borders and fonts (all logical px) look the same physical size on any external monitor.
+-- The laptop panel is 144 PPI, so 1.5 gives ~96 logical PPI there. Every other output gets its
+-- scale from its PPI (below) so gaps, borders and fonts (all logical px) look the same physical
+-- size on any external monitor.
 hl.monitor({ output = "eDP-1", mode = "preferred", position = "auto", scale = 1.5 })
 hl.monitor({ output = "",      mode = "preferred", position = "auto", scale = "auto" })
 
